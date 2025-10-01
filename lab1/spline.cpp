@@ -15,6 +15,8 @@ float radius = 0.2;
 
 float R = 1.0, G = 1.0, B = 0.0;
 
+int n = 30;
+
 // //Pontos de controle da Spline
 GLfloat ctrlpoints[4][3] = {
    {0.1, 0.1, 0.0}, 
@@ -30,7 +32,32 @@ void idle(void)
       ctrlpoints[pointIndex][0] = mouseX;
       ctrlpoints[pointIndex][1] = mouseY;
 
+      // incrementar e diminuir os pontos da curva 
+
+
       glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, 4, &ctrlpoints[0][0]); 
+   }
+
+   glutPostRedisplay();
+}
+
+void keyPress(unsigned char key, int x, int y)
+{
+   if(key == '-')
+   {
+      printf("tecla - pressionada\n");
+      if(n>2)
+      {
+         n -= 1;
+      }
+   }
+   else if(key == '=')
+   {
+      printf("tecla + pressionada\n");
+      if(n<100)
+      {
+         n += 1;
+      }
    }
 
    glutPostRedisplay();
@@ -121,7 +148,6 @@ void display(void)
    glClear(GL_COLOR_BUFFER_BIT);
    
    /* Desenha a curva aproximada por n+1 pontos. */
-   int n = 30;
    glColor3f(1.0, 1.0, 1.0);
    glBegin(GL_LINE_STRIP);
       for (i = 0; i <= n; i++){
@@ -153,6 +179,8 @@ int main(int argc, char** argv)
    glutMouseFunc(mouse);
    glutMotionFunc(mouseMotion);
    glutIdleFunc(idle);
+   glutKeyboardFunc(keyPress);
+
    glutMainLoop();
 
    return 0;
