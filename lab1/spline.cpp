@@ -29,13 +29,17 @@ void idle(void)
 {
    if(pointIndex > -1 && pointState[pointIndex] == 0)
    {
-      ctrlpoints[pointIndex][0] = mouseX;
-      ctrlpoints[pointIndex][1] = mouseY;
 
-      // incrementar e diminuir os pontos da curva 
+      // verifica se a posição do mouse é limite da tela 
+      if(mouseX > 0.01 && mouseX < 0.99 && mouseY > 0.01 && mouseY < 0.99)
+      {
+         ctrlpoints[pointIndex][0] = mouseX;
+         ctrlpoints[pointIndex][1] = mouseY;
+   
+         // incrementar e diminuir os pontos da curva 
+         glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, 4, &ctrlpoints[0][0]);
+      }
 
-
-      glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, 4, &ctrlpoints[0][0]); 
    }
 
    glutPostRedisplay();
