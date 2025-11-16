@@ -41,7 +41,7 @@ namespace Alglib
     Mat2 Mat2::operator*(const Mat2& a) const
     {
         Mat2 mat = identidade();
-
+        
         for(int i=0; i<3; ++i)
         {
             for(int j=0; j<3; ++j)
@@ -96,6 +96,16 @@ namespace Alglib
         *this = (*this) * tl;
         
         return *this;
+    }
+
+    Tuple2 Mat2::transformaTupla(const Tuple2& t) const
+    {
+        Tuple2 r(0.0f);
+
+        r.x = m[0][0] * t.x + m[0][1] * t.y + m[0][2] * t.w;
+        r.y = m[1][0] * t.x + m[1][1] * t.y + m[1][2] * t.w;
+
+        return r;
     }
 
     void Mat2::imprime() const

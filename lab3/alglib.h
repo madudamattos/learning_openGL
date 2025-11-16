@@ -6,8 +6,24 @@
 #include <GL/gl.h>
 
 namespace Alglib {
-    struct Vet2 {
-        GLfloat x, y;
+    class Tuple2{
+        public:
+            GLfloat x,y,w;
+
+            Tuple2(GLfloat w){
+                x = 0.0f;
+                y = 0.0f;
+                w = w;
+            };
+
+            Tuple2(GLfloat x,GLfloat y, GLfloat w){
+                x = x;
+                y = y;
+                w = w;
+            };
+
+            void imprime(const Tuple2& t) const;
+
     };
 
     class Mat2{
@@ -23,7 +39,7 @@ namespace Alglib {
             Mat2& rotacao(GLfloat theta);
             Mat2& translacao(GLfloat dX, GLfloat dY);
 
-            Vet2 transformaVetor(const Vet2& p) const;
+            Tuple2 transformaTupla(const Tuple2& t) const;
 
             void imprime() const;
 
