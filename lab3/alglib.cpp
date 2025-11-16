@@ -19,7 +19,7 @@ namespace Alglib
         }
     }
 
-    Mat2 Mat2::identidade() 
+    Mat2 Mat2::Identity() 
     {
         Mat2 I; 
 
@@ -38,14 +38,21 @@ namespace Alglib
         return I;
     }
 
-    Mat2 Mat2::operator*(const Mat2& a) const
+    Mat2 Mat2::Copy() const
     {
-        Mat2 mat = identidade();
+        return *this;
+    }
+
+    Mat2 Mat2::MatrixMultiply(const Mat2& a) const
+    {
+        Mat2 mat = Identity();
         
         for(int i=0; i<3; ++i)
         {
             for(int j=0; j<3; ++j)
             {
+                mat.m[i][j] = 0.0f;
+
                 for(int k=0; k<3; ++k)
                 {
                     mat.m[i][j] += m[i][k] * a.m[k][j];
@@ -56,59 +63,49 @@ namespace Alglib
         return mat; 
     }
 
-    Mat2& Mat2::escala(GLfloat sx, GLfloat sy)
+    Mat2& Mat2::Scale(GLfloat sx, GLfloat sy)
     {
-        Mat2 sc = identidade();
+        Mat2 sc = Identity();
 
         sc.m[0][0] = sx;
         sc.m[1][1] = sy;
         
-        *this = (*this) * sc;
+        *this = (*this).MatrixMultiply(sc);
         
         return *this;
     }
 
     // espera o angulo em graus
-    Mat2& Mat2::rotacao(GLfloat theta)
+    Mat2& Mat2::Rotate(GLfloat theta)
     {
         // converte o angulo para radiano
         GLfloat d = theta * M_PI / 180;
 
-        Mat2 rt = identidade();
+        Mat2 rt = Identity();
 
         rt.m[0][0] = cos(d);
         rt.m[0][1] = -sin(d);
         rt.m[1][0] = sin(d);
         rt.m[1][1] = cos(d);
         
-        *this = (*this) * rt;
+        *this = (*this).MatrixMultiply(rt);
         
         return *this;
     }
 
-    Mat2& Mat2::translacao(GLfloat dX, GLfloat dY)
+    Mat2& Mat2::Translate(GLfloat dX, GLfloat dY)
     {
-        Mat2 tl = identidade();
+        Mat2 tl = Identity();
 
         tl.m[0][2] = dX;
         tl.m[1][2] = dY;
 
-        *this = (*this) * tl;
+        *this = (*this).MatrixMultiply(tl);
         
         return *this;
     }
 
-    Tuple2 Mat2::transformaTupla(const Tuple2& t) const
-    {
-        Tuple2 r(0.0f);
-
-        r.x = m[0][0] * t.x + m[0][1] * t.y + m[0][2] * t.w;
-        r.y = m[1][0] * t.x + m[1][1] * t.y + m[1][2] * t.w;
-
-        return r;
-    }
-
-    void Mat2::imprime() const
+    void Mat2::Print() const
     {
         for(int i=0; i<3; i++)
         {
@@ -116,7 +113,7 @@ namespace Alglib
             for(int j=0; j<3; j++)
             {
                 std::cout << m[i][j];
-                if(j=!2) std::cout << " ";
+                if(j!=2) std::cout << " ";
             }
 
             std::cout << "]" << std::endl;
@@ -124,6 +121,23 @@ namespace Alglib
 
         std::cout << "]" << std::endl;
     }
+
+    Tuple2 Mat2::Transform(const Tuple2& t) const
+    {
+        Tuple2 r(0.0f);
+
+        r.x = m[0][0] * t.x + m[0][1] * t.y + m[0][2] * t.w;
+        r.y = m[1][0] * t.x + m[1][1] * t.y + m[1][2] * t.w;
+        
+        return r;
+    }
+
+    void Tuple2::Print() const
+    {
+        std::cout << "[" << this->x << " " << this->y << " " << this->w << "]" << std::endl;
+    }
+
+
 
 
 }

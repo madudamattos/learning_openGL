@@ -1,6 +1,10 @@
 #include "robo.h"
+#include "alglib.h"
 #include <stdio.h>
 #include <math.h>
+#include <iostream>
+
+using namespace Alglib;
 
 void Robo::DesenhaRect(GLint height, GLint width, GLfloat R, GLfloat G, GLfloat B)
 {
@@ -92,6 +96,11 @@ void Robo::MoveEmX(GLfloat dx)
 
 void RotatePoint(GLfloat x, GLfloat y, GLfloat angle, GLfloat &xOut, GLfloat &yOut)
 {
+
+}
+
+void RotatePoint(GLfloat x, GLfloat y, GLfloat angle, GLfloat &xOut, GLfloat &yOut)
+{
     // Converte ângulo de graus para radianos
     float angleRad = angle * M_PI / 180.0f;
     
@@ -148,3 +157,38 @@ Tiro* Robo::Atira()
     // Cria novo tiro na posição da ponta do braço
     return new Tiro(xTip, yTip, anguloTiro);
 }
+
+// Tiro* Robo::Atira()
+// {
+//     // define a origem em 0,0
+//     Tuple2 t1 = Tuple2(1);
+
+//     Mat2 m = Mat2::Identity();
+
+//     std::cout << "Atirou!" << std::endl;
+    
+//     // Aplica as transformações na mesma ordem do desenho
+//     // Translação para posição do robô
+//     m.Print();
+    
+//     m.Translate(gX, gY)
+//      .Translate(0,baseHeight) // fim da base
+//      .Rotate(gTheta1)
+//      .Translate(0,paddleHeight)
+//      .Rotate(gTheta2)
+//      .Translate(0,paddleHeight)
+//      .Rotate(gTheta3)
+//      .Translate(0,paddleHeight);
+
+//     m.Print();
+
+//     Tuple2 r = m.Transform(t1);
+
+//     GLfloat xTiro = r.GetX();
+//     GLfloat yTiro = r.GetY();
+//     GLfloat dTiro = 0.0f;
+
+//     std::cout << "xTiro: " << xTiro << " yTiro: " << yTiro<< std::endl;
+
+//     return new Tiro(xTiro, yTiro, dTiro);
+// }

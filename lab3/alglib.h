@@ -10,19 +10,27 @@ namespace Alglib {
         public:
             GLfloat x,y,w;
 
+            GLfloat GetX() const {return this->x;};
+            GLfloat GetY() const {return this->y;};
+            GLfloat GetW() const {return this->w;};
+
+            void SetX(GLfloat value) {x = value;};
+            void SetY(GLfloat value) {y = value;};
+            void SetW(GLfloat value) {w = value;};
+            
             Tuple2(GLfloat w){
-                x = 0.0f;
-                y = 0.0f;
-                w = w;
+                this->x = 0.0f;
+                this->y = 0.0f;
+                this->w = w;
             };
 
             Tuple2(GLfloat x,GLfloat y, GLfloat w){
-                x = x;
-                y = y;
-                w = w;
+                this->x = x;
+                this->y = y;
+                this->w = w;
             };
 
-            void imprime(const Tuple2& t) const;
+            void Print() const;
 
     };
 
@@ -32,18 +40,19 @@ namespace Alglib {
 
         public:
             Mat2();
-            static Mat2 identidade();
+            static Mat2 Identity();
             
-            Mat2 operator*(const Mat2& other) const;
-            Mat2& escala(GLfloat sX, GLfloat sY);
-            Mat2& rotacao(GLfloat theta);
-            Mat2& translacao(GLfloat dX, GLfloat dY);
+            Mat2 Copy() const;
+            Mat2 MatrixMultiply(const Mat2& other) const;
+            Mat2& Scale(GLfloat sX, GLfloat sY);
+            Mat2& Rotate(GLfloat theta);
+            Mat2& Translate(GLfloat dX, GLfloat dY);
 
-            Tuple2 transformaTupla(const Tuple2& t) const;
+            Tuple2 Transform(const Tuple2& t) const;
 
-            void imprime() const;
+            void Print() const;
 
-            const std::array<std::array<GLfloat, 3>, 3>& data() const { return m; }
+            const std::array<std::array<GLfloat, 3>, 3>& Data() const { return m; }
     };
 }
 
