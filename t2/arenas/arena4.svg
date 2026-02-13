@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="arena4.svg"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.3583333"
+     inkscape:cx="417.42332"
+     inkscape:cy="498.03682"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="1912"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1" />
+  <circle
+     cx="500"
+     cy="500"
+     r="300"
+     fill="blue"
+     id="1" />
+  <circle
+     cx="570.17175"
+     cy="578.31903"
+     r="20"
+     fill="#ff0000"
+     id="5" />
+  <circle
+     cx="569.34186"
+     cy="415.92682"
+     r="20"
+     fill="#008000"
+     id="6" />
+  <circle
+     fill="#000000"
+     cx="428.4205"
+     cy="489.79309"
+     r="25"
+     id="7" />
+  <circle
+     fill="#000000"
+     cx="522.18402"
+     cy="490.90186"
+     r="25"
+     id="7-1" />
+  <circle
+     fill="#000000"
+     cx="567.92023"
+     cy="491.52762"
+     r="25"
+     id="7-7" />
+  <circle
+     fill="#000000"
+     cx="614.3374"
+     cy="492.31903"
+     r="25"
+     id="7-2" />
+  <circle
+     fill="#000000"
+     cx="319.65643"
+     cy="671.42944"
+     r="25"
+     id="7-16" />
+  <circle
+     fill="#000000"
+     cx="331.27606"
+     cy="317.9632"
+     r="25"
+     id="7-6" />
+  <circle
+     fill="#000000"
+     cx="730.38037"
+     cy="391.16565"
+     r="25"
+     id="7-27" />
+  <circle
+     fill="#000000"
+     cx="710.90186"
+     cy="653.20862"
+     r="25"
+     id="7-3" />
+  <circle
+     fill="#000000"
+     cx="453.33743"
+     cy="284.58282"
+     r="25"
+     id="7-34" />
+</svg>
