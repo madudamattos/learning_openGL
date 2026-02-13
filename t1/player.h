@@ -4,42 +4,75 @@
 #include <GL/gl.h>
 #include <iostream>
 #include <math.h>
+#include <functional>        
+#include "alglib.h"
+#include "bullet.h"
+#include "collider.h"
+#include "collisionSystem.h" 
+
+#define rectWidth 10
+#define rectHeight 40
 
 class Player
 {
     GLint gXinit, gYinit, radius;
-    GLint gX, gY;
     GLfloat R, G, B;
-    // Armazena cor
+    GLfloat armAngle, bodyAngle;
+    Alglib::Mat2 pos, gunPos; 
+    bool isWalking;
+    GLdouble lastWalkTime;
+    Collider collider;
 
     public:
-        Player(){
-            this->gXinit = 0.0f;
-            this->gYinit = 0.0f;
-            this->radius = 0.0f;
-            this->gX = 0.0f;
-            this->gY = 0.0f;
-            this->R = 0.0f;
-            this->G = 0.0f;
-            this->B = 0.0f;
-        }
+        using PlayerCallback = std::function<void(Player*)>;
+    private:
+        PlayerCallback callback;
 
-        void SetParameters(GLint x, GLint y, GLint rad);
+    public:
+        enum class Foot { LeftFront = 0, RightFront = 1 };
+        void SetPlayerCallback(PlayerCallback cb);
+
+    private:
+        Foot footWalking; 
+
+    public:
+        Player();
+
+        void SetParameters(GLint x, GLint y, GLint rad, std::function<void()> onCollision);
 
         void DefineColor(GLfloat R, GLfloat G, GLfloat B);
-        
-        void DebugPrint(const char* tag) const {
-            std::cout << "[DEBUG] " << tag
-                      << " addr=" << this
-                      << " gX=" << gX << " gY=" << gY
-                      << " radius=" << radius
-                      << " color=(" << R << "," << G << "," << B << ")\n";
-        }
+
         void Draw();
-        void MovePlayer(GLint x, GLint y);
+
+        void SetFootWalking(Foot value);
+        Foot GetFootWalking() const { return footWalking; }
+
+        void SetWalkTime(GLdouble t) { lastWalkTime = t; };
+        void CheckFootChange(GLdouble t);
+
+        void SetIsWalking(bool value) { isWalking = value; }
+        bool GetIsWalking() const { return isWalking; }
+
+        void SetArmAngle(GLfloat degrees);
+        void IncreaseArmAngle(GLfloat inc);
+        GLfloat GetArmAngle() const { return armAngle; }
         
+        void Rotate(GLfloat inc, GLdouble tDif);
+        GLfloat GetBodyRotation() { return bodyAngle; }
+
+        void SetRotation(GLfloat angle);
+
+        void Move(GLfloat inc, GLdouble tDif); 
+        
+        GLfloat GetYPos();
+        GLfloat GetXPos();
+
+        void ResetPosition();
+        
+        Bullet* Shoot();
+
     private:
-        void DrawCircle(GLint radius, GLfloat R, GLfloat G, GLfloat B);
+        void DrawElipse(GLint radius, GLfloat R, GLfloat G, GLfloat B, bool isCircle);
         void DrawRect(GLint height, GLint width, GLfloat R, GLfloat G, GLfloat B);
 };
 

@@ -5,18 +5,27 @@
 #include <vector>
 #include <cmath>
 #include <iostream>
-
-// Lembrar de desalocar memória ao liberar a arena !! 
+#include "collisionSystem.h"
+#include "collider.h"
 
 struct Obstacle
 {
     GLfloat x, y, r;
+    Collider obstacleCollider;
+
+    Obstacle() : x(0), y(0), r(0) {}
+    Obstacle(GLfloat xx, GLfloat yy, GLfloat rr)
+        : x(xx), y(yy), r(rr)
+    {
+        obstacleCollider.SetParameters(x, y, r, 0.0f, CollisionType::External, Collider::Callback());
+    }
 };
 
 class Arena
 {
     GLfloat gX, gY, radius;
     std::vector<Obstacle> obstacles; 
+    Collider collider;
 
     public:
         Arena(){
@@ -26,16 +35,11 @@ class Arena
         }
 
         void SetParameters(GLfloat x, GLfloat y, GLfloat radius);
-        
-        void DebugPrint() const {
-            std::cout << "[DEBUG] Arena addr=" << this
-                      << " center=(" << gX << "," << gY << ")"
-                      << " radius=" << radius
-                      << " obstacles=" << obstacles.size() << "\n";
-        }
 
         // Adiciona um obstáculo dinamicamente ao vetor obstaculos
         void AddObstacle(GLfloat x, GLfloat y, GLfloat r);
+
+        std::vector<Obstacle>& GetObstacleVector() { return obstacles; }
 
         // Retorna a quantidade de obstáculos existente
         int ObstacleCount();
@@ -48,7 +52,7 @@ class Arena
 
         // Libera memória da arena
         void Clear();
-
+        
     private:
         void DrawCircle(GLint rad, GLfloat R, GLfloat G, GLfloat B);
         

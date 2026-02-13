@@ -1,15 +1,26 @@
 #include "arena.h"
 
+extern CollisionSystem* gCollisionSystem;
+
 void Arena::SetParameters(GLfloat x, GLfloat y, GLfloat r)
 {
     this->gX = x;
     this->gY = y;
     this->radius = r;
+
+    collider.SetParameters(x,y, r, 0.0f, CollisionType::Internal, NULL);
 }
 
 void Arena::AddObstacle(GLfloat x, GLfloat y, GLfloat r)
 {
-    obstacles.push_back(Obstacle{x, y, r});
+    obstacles.emplace_back();           
+    Obstacle &dst = obstacles.back();   
+
+    dst.x = x;
+    dst.y = y;
+    dst.r = r;
+
+    dst.obstacleCollider.SetParameters(x, y, r, 0.0f, CollisionType::External, Collider::Callback());
 }
 
 void Arena::Clear()
@@ -52,7 +63,6 @@ void Arena::Draw()
 {
     // Draw the main circle
     glPushMatrix();
-    glScalef(1.0f, -1.0f, 1.0f);
     glTranslatef(gX, gY, 0);
     DrawCircle(radius, 0, 0, 1.0f);
     glPopMatrix();
@@ -62,7 +72,6 @@ void Arena::Draw()
     // Draw individual obstacles
     for (const auto &obs : obstacles) {
         glPushMatrix();
-        glScalef(1.0f, -1.0f, 1.0f);
         glTranslatef(obs.x, obs.y, 0.0f);
         DrawCircle(obs.r, 0.0f, 0.0f, 0.0f);
         glPopMatrix();
