@@ -19,8 +19,6 @@ void Arena::AddObstacle(GLfloat x, GLfloat y, GLfloat r)
     dst.x = x;
     dst.y = y;
     dst.r = r;
-
-    // dst.obstacleCollider.SetParameters(x, y, r, 0.0f, CollisionType::External, Collider::Callback());
 }
 
 void Arena::Clear()
