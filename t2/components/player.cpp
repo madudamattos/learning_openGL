@@ -1,4 +1,6 @@
 #include "player.h"
+#include "material.h"
+#include <GL/glut.h>
 
 #define timeOffset 0.4f // intervalo em segundos entre troca de perna
 #define epsilon 0.0f 
@@ -10,9 +12,7 @@ Player::Player(){
     this->gYinit = 0.0f;
     this->radius = 0.0f;
     
-    this->R = 0.0f;
-    this->G = 0.0f;
-    this->B = 0.0f;
+    this->material = Material(1.0f,1.0f,1.0f);
 
     this->footWalking = Foot::RightFront; 
     this->isWalking = false;
@@ -74,108 +74,64 @@ void Player::IncreaseArmAngle(GLfloat inc)
 }
 
 void Player::DefineColor(GLfloat R, GLfloat G, GLfloat B){
-    this->R = R;
-    this->G = G;
-    this->B = B;
+    this->material.SetColor(R,G,B);
 }
 
 void Player::DrawElipse(GLint radius, GLfloat R, GLfloat G, GLfloat B, bool isCircle)
 {   
-    float rx = radius;
-    float ry = isCircle? radius : radius/4;
-    
-    glColor3f(R, G, B); 
-    glBegin(GL_POLYGON);
-        for(int deg=0; deg<360; deg+=20)
-        {
-            float theta = deg* M_PI / 180.0f; // deg->rad
-            float x = rx * cos(theta);
-            float y = ry * sin(theta);
 
-            glVertex3f(x, -y, 0.0f); 
-        }
-    glEnd();
-
-    // Desenha o contorno preto em volta
-    glColor3f(0, 0, 0); 
-    glLineWidth(1.0f);
-    glBegin(GL_LINE_LOOP);
-        for(int deg=0; deg<360; deg+=20)
-        {
-            float theta = deg* M_PI / 180.0f; // deg->rad
-            float x = rx * cos(theta);
-            float y = ry * sin(theta);
-
-            glVertex3f(x, -y, 0.0f); 
-        }
-    glEnd();
 }
 
-void Player::DrawRect(GLint height, GLint width, GLfloat R, GLfloat G, GLfloat B)
+void Player::DrawRect(GLfloat sx, GLfloat sy, GLfloat sz)
+{   
+    glScalef(sx, sy, sz);
+    glutSolidCube(1.0);
+}
+
+void Player::DrawSphere(GLfloat r)
 {
-    glColor3f (R, G, B);
-
-    glBegin(GL_POLYGON);
-      glVertex3f (-width/2, 0, 0.0);
-      glVertex3f (width/2, 0, 0.0);
-      glVertex3f (width/2, height, 0.0);
-      glVertex3f (-width/2, height, 0.0);
-   glEnd();
-
-   glColor3f (0.0f, 0.0f, 0.0f);
-   glLineWidth(1.0f);
-   glBegin(GL_LINE_LOOP);
-      glVertex3f (-width/2, 0, 0.0);
-      glVertex3f (width/2, 0, 0.0);
-      glVertex3f (width/2, height, 0.0);
-      glVertex3f (-width/2, height, 0.0);
-   glEnd();
+    glutSolidSphere((GLdouble) r, 20, 10);
 }
 
 void Player::Draw()
 {   
     GLfloat gX = this->GetXPos();
-    GLfloat gY = this->GetYPos();
+    GLfloat gZ = this->GetYPos();
 
-    // // desenha as pernas
-    if(footWalking == Foot::LeftFront){
-        glPushMatrix();
-        glTranslatef(gX, gY, 0);
-        glRotatef(bodyAngle, 0, 0, 1);
-        glTranslatef(radius/2, 0, 0); 
-        DrawRect(rectHeight, rectWidth, 0.0f, 0.0f, 0.0f); // perna direita na frente
-        glTranslatef(-radius, 0, 0); 
-        DrawRect(-rectHeight, rectWidth, 0.0f, 0.0f, 0.0f); // perna esquerda atras
-        glPopMatrix();
-    } else if (footWalking == Foot::RightFront)
-    {
-        glPushMatrix();
-        glTranslatef(gX, gY, 0);
-        glRotatef(bodyAngle, 0, 0, 1);
-        glTranslatef(-radius/2, 0, 0); 
-        DrawRect(rectHeight, rectWidth, 0.0f, 0.0f, 0.0f); // perna direita na frente
-        glTranslatef(radius, 0, 0); 
-        DrawRect(-rectHeight, rectWidth, 0.0f, 0.0f, 0.0f); // perna esquerda atras
-        glPopMatrix();
-    }
+    this->material.Apply(GL_FRONT_AND_BACK);
 
-    // Desenha a arma
+    // pernas
     glPushMatrix();
-    glTranslatef(gX, gY, 0); 
+    glTranslatef(gX, 0.75*radius, gZ);
     glRotatef(bodyAngle, 0, 0, 1);
-    glTranslatef(radius*2 - radius *0.5, 0, 0); 
-    glRotatef(armAngle, 0.0f, 0.0f, 1.0f); // aplica o ângulo da arma
-    DrawRect(rectHeight, rectWidth, R, G, B); //desenha a arma
+    DrawRect(radius*.8, 1.5*radius, radius*.8);
     glPopMatrix();
 
-    // Desenha a cabeça e o corpo
+    // corpo
     glPushMatrix();
-    glTranslatef(gX, gY, 0);
+    glTranslatef(gX, 0.75*radius, gZ);
     glRotatef(bodyAngle, 0, 0, 1);
-    DrawElipse(radius * 2, R, G, B, false); // desenha o corpo
-    DrawElipse(radius, R, G, B, true); // desenha a cabeça
+    glTranslatef(0, radius*0.9, 0);
+    DrawSphere(radius);
     glPopMatrix();
 
+    // braço
+    glPushMatrix();
+    glTranslatef(gX, 0.75*radius, gZ);
+    glRotatef(bodyAngle, 0, 0, 1);
+    glTranslatef(0, radius*0.9, 0); // translada pro meio do corpo
+    glTranslatef(radius, 0, radius); // translada pra lateral da esfera
+    DrawRect(rectWidth,rectWidth, rectHeight);
+    glPopMatrix();
+
+    // cabeça
+    glPushMatrix();
+    glTranslatef(gX, 0.75*radius, gZ);
+    glRotatef(bodyAngle, 0, 0, 1);
+    glTranslatef(0, radius*0.9, 0);
+    glTranslatef(0, 2*radius*0.7, 0);
+    DrawSphere(radius * 0.6);
+    glPopMatrix();
 }
 
 void Player::SetRotation(GLfloat angle)
@@ -190,16 +146,7 @@ void Player::Rotate(GLfloat inc, GLdouble tDif)
 
 void Player::ResetPosition()
 {
-    this->pos.Replace(Alglib::Mat2::Identity());
-    pos.Translate(this->gXinit, this->gYinit);
 
-    this->bodyAngle = 0.0f;
-    this->armAngle = 0.0f;
-    this->footWalking = Foot::RightFront;
-    this->isWalking = false;
-    this->lastWalkTime = 0.0;
-
-    this->SetArmAngle(0.0f); 
 }
 
 void Player::Move(GLfloat inc, GLdouble tDif)

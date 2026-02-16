@@ -9,6 +9,7 @@
 #include "bullet.h"
 #include "collider.h"
 #include "collisionSystem.h" 
+#include "../utils/material.h"
 
 #define rectWidth 10
 #define rectHeight 40
@@ -16,7 +17,7 @@
 class Player
 {
     GLint gXinit, gYinit, radius;
-    GLfloat R, G, B;
+    Material material;
     GLfloat armAngle, bodyAngle;
     Alglib::Mat2 pos, gunPos; 
     bool isWalking;
@@ -73,7 +74,8 @@ class Player
 
     private:
         void DrawElipse(GLint radius, GLfloat R, GLfloat G, GLfloat B, bool isCircle);
-        void DrawRect(GLint height, GLint width, GLfloat R, GLfloat G, GLfloat B);
+        void DrawRect(GLfloat sx, GLfloat sy, GLfloat sz);
+        void DrawSphere(GLfloat r);
 };
 
 #endif

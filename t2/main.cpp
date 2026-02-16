@@ -49,17 +49,92 @@ void * font = GLUT_BITMAP_9_BY_15;
 
 int keyStatus[256];
 
+// debug function
+void DrawAxes(double size)
+{
+    GLfloat mat_ambient_r[] = { 1.0, 0.0, 0.0, 1.0 };
+    GLfloat mat_ambient_g[] = { 0.0, 1.0, 0.0, 1.0 };
+    GLfloat mat_ambient_b[] = { 0.0, 0.0, 1.0, 1.0 };
+    GLfloat no_mat[] = { 0.0, 0.0, 0.0, 1.0 };
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, 
+            no_mat);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, no_mat);
+    glMaterialfv(GL_FRONT, GL_SHININESS, no_mat);
+
+    //x axis red
+    glPushMatrix();
+        glMaterialfv(GL_FRONT, GL_EMISSION, 
+                mat_ambient_r);
+        glColor3fv(mat_ambient_r);
+        glScalef(size, size*0.1, size*0.1);
+        glTranslatef(0.5, 0, 0); // put in one end
+        glutSolidCube(1.0);
+    glPopMatrix();
+
+    //y axis green
+    glPushMatrix();
+        glMaterialfv(GL_FRONT, GL_EMISSION, 
+                mat_ambient_g);
+        glColor3fv(mat_ambient_g);
+        glRotatef(90,0,0,1);
+        glScalef(size, size*0.1, size*0.1);
+        glTranslatef(0.5, 0, 0); // put in one end
+        glutSolidCube(1.0);
+    glPopMatrix();
+
+    //z axis blue
+    glPushMatrix();
+        glMaterialfv(GL_FRONT, GL_EMISSION, mat_ambient_b);
+        glColor3fv(mat_ambient_b);
+        glRotatef(-90,0,1,0);
+        glScalef(size, size*0.1, size*0.1);
+        glTranslatef(0.5, 0, 0); // put in one end
+        glutSolidCube(1.0);
+    glPopMatrix();    
+}
+
 void renderScene(void)
 {
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    // Use the same fovy used in init() and compute a camera distance that
+    // fits the whole "ViewingHeight" in view (minimal perspective distortion).
+    const float fovy_deg = 30.0f; // must match init()'s fovy
+    const float fovy_rad = fovy_deg * (float)M_PI / 180.0f;
+    const float halfViewHeight = (float)ViewingHeight * 0.5f;
+
+    // distance so that the vertical span at z=0 equals ViewingHeight
+    float eyeDist = (halfViewHeight / tanf(fovy_rad * 0.5f));
+
+    // small margin so edges are not clipped
+    const float margin = 1.05f;
+    eyeDist *= margin;
+
+    // DEBUG: VISTA ANGULADA
+    // position camera on +Y looking to origin, Z is up
+    // gluLookAt(300.0f, eyeDist * 0.2, -700.0f,   // eye
+    //           0.0f, 0.0f, 0.0f,      // center
+    //           0.0f, 1.0f, 0.0f);     // up = Z
+
+
+    // DEBUG: VISTA DE CIMA 
+    gluLookAt(0, 1100, 0,   // eye
+              0.0f, 0.0f, 0.0f,      // center
+              0.0f, 0.0f, 1.0f);     // up = Z
+
+    // update light position to follow camera (optional but usually desirable)
+    GLfloat light_position[] = { 0.0f, eyeDist, 0.0f, 1.0f };
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
+    DrawAxes(70); // DEBUG
     arena.Draw();
-
     player2.Draw();
-
     player1.Draw();
 
-    glutSwapBuffers(); 
+    glutSwapBuffers();
 }
 
 
@@ -94,20 +169,26 @@ void idle(void)
  
 void init(void)
 {
+    glClearColor (0.0, 0.0, 0.0, 0.0);
+    glShadeModel (GL_SMOOTH);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glEnable(GL_DEPTH_TEST);
+
     ResetKeyStatus();
-    // The color the windows will redraw. Its done to erase the previous frame.
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Black, no opacity(alpha).
- 
-    glMatrixMode(GL_PROJECTION); // Select the projection matrix    
-    glOrtho(-(ViewingWidth/2),     // X coordinate of left edge             
-            (ViewingWidth/2),     // X coordinate of right edge            
-            -(ViewingHeight/2),     // Y coordinate of bottom edge             
-            (ViewingHeight/2),     // Y coordinate of top edge             
-            -100,     // Z coordinate of the “near” plane            
-            100);    // Z coordinate of the “far” plane
-    glMatrixMode(GL_MODELVIEW); // Select the projection matrix    
+
+    // Projeção em perspectiva com FOV menor (menos distorção)
+    float fovy = 30.0f;                      // experimente 20..35
+    float aspect = (GLfloat)Width / (GLfloat)Height;
+    float nearv = 1.0f;
+    float farv  = 2000.0f;
+
+    glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-      
+    gluPerspective(fovy, aspect, nearv, farv);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 }
 
 void readSVG(const char *fileName)
@@ -135,7 +216,7 @@ void readSVG(const char *fileName)
     XMLElement* c2 = c1 ? c1->NextSiblingElement("circle") : nullptr;
     XMLElement* c3 = c2 ? c2->NextSiblingElement("circle") : nullptr;
 
-    GLfloat arenaCx, arenaCy, arenaR;
+    GLfloat arenaCx, arenaCy, arenaR, height;
     if (c1) {
         arenaCx = c1->IntAttribute("cx", 0);
         arenaCy = c1->IntAttribute("cy", 0);
@@ -150,7 +231,7 @@ void readSVG(const char *fileName)
         GLfloat cy = c2->IntAttribute("cy", 0);
         GLfloat r  = c2->IntAttribute("r",  0);
 
-        player2.SetParameters(cx - arenaCx, - cy + arenaCy, r, [](){ gameManager.decLifePlayer2(); });
+        player2.SetParameters(arenaCx - cx, - cy + arenaCy, r, [](){ gameManager.decLifePlayer2(); });
         player2.DefineColor(1.0f, 0, 0); // Player 2 is red
     }
     if (c3) {
@@ -158,7 +239,9 @@ void readSVG(const char *fileName)
         GLfloat cy = c3->IntAttribute("cy", 0);
         GLfloat r  = c3->IntAttribute("r",  0);
 
-        player1.SetParameters(cx - arenaCx, - cy + arenaCy, r, [](){ gameManager.decLifePlayer1(); });
+        height = 6*r;
+        
+        player1.SetParameters(arenaCx - cx, - cy + arenaCy, r, [](){ gameManager.decLifePlayer1(); });
         player1.DefineColor(0, 1.0f, 0); // Player 1 is green
     }
 
@@ -171,7 +254,7 @@ void readSVG(const char *fileName)
         int cy = c->IntAttribute("cy", 0);
         int r  = c->IntAttribute("r",  0);
         
-        arena.AddObstacle(cx - arenaCx, - cy + arenaCy, r);
+        arena.AddObstacle(arenaCx - cx, - cy + arenaCy, r, 2*height);
     }
 }
 
@@ -182,7 +265,9 @@ int main(int argc, char *argv[])
     // Initialize openGL with Double buffer and RGB color without transparency.
     // Its interesting to try GLUT_SINGLE instead of GLUT_DOUBLE.
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    glutInitDisplayMode (GLUT_DOUBLE | 
+                        GLUT_RGB | 
+                        GLUT_DEPTH);
 
     // Create the window.
     glutInitWindowSize(Width, Height);
