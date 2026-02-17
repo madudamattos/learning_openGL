@@ -5,7 +5,9 @@ LIBS := -lGL -lGLU -lglut
 
 TARGET := trabalhocg3D
 SRCS := $(wildcard *.cpp components/*.cpp managers/*.cpp utils/*.cpp)
-OBJS := $(SRCS:.cpp=.o)
+
+OBJDIR := objects
+OBJS := $(patsubst %.cpp,$(OBJDIR)/%.o,$(SRCS))
 
 .PHONY: all clean
 
@@ -14,8 +16,10 @@ all: $(TARGET)
 $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)
 
-%.o: %.cpp
+$(OBJDIR)/%.o: %.cpp
+	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
 clean:
-	rm -f $(TARGET) $(OBJS)
+	rm -f $(TARGET)
+	rm -rf $(OBJDIR)

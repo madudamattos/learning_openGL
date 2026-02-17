@@ -16,7 +16,7 @@
 
 class Player
 {
-    GLint gXinit, gYinit, gZinit, radius;
+    GLfloat gXinit, gYinit, gZinit, radius, height;
     Material material;
     GLfloat bodyAngle;
     Alglib::Tuple3 armAngle;
@@ -39,7 +39,7 @@ class Player
     public:
         Player();
 
-        void SetParameters(GLfloat x, GLfloat y, GLfloat z, GLfloat rad, std::function<void()> onCollision);
+        void SetParameters(GLfloat x, GLfloat y, GLfloat z, GLfloat rad, GLfloat height, std::function<void()> onCollision);
 
         void DefineColor(GLfloat R, GLfloat G, GLfloat B);
 
@@ -63,6 +63,7 @@ class Player
         GLfloat GetYPos();
         GLfloat GetXPos();
         GLfloat GetZPos();
+        GLfloat GetHeight();
 
         void ResetPosition();
         

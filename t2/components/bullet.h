@@ -34,7 +34,7 @@ public:
 
 private:
     Material material;
-    Alglib::Tuple3 initPos; // ponto inicial
+    Alglib::Tuple3 initPos; 
     Alglib::Tuple3 currentPos;
     Alglib::Tuple3 directionAng;
     GLfloat gVel;

@@ -12,6 +12,7 @@ Player::Player(){
     this->gYinit = 0.0f;
     this->gZinit = 0.0f;
     this->radius = 0.0f;
+    this->height = 0.0f;
     
     this->material = Material(1.0f,1.0f,1.0f);
 
@@ -25,16 +26,21 @@ Player::Player(){
     this->pos = Alglib::Mat3::Identity();
 }
 
-void Player::SetParameters(GLfloat x, GLfloat y, GLfloat z, GLfloat rad, std::function<void()> onCollision = nullptr){
+void Player::SetParameters(GLfloat x, GLfloat y, GLfloat z, GLfloat rad, GLfloat height, std::function<void()> onCollision = nullptr){
     this->gXinit = x;
     this->gYinit = y;
     this->gZinit = z;
     this->radius = rad;
+    this->height = height;
 
     this->bodyAngle = 0.0f;
     this->footWalking = Foot::LeftFront;
     this->isWalking = false;
     
+    // inicia colisor 
+    collider.SetParameters(x,y, z, rad, height, epsilon, CollisionType::External, [onCollision](Collider*, Collider*){if (onCollision) onCollision();});
+
+
     // seta matriz de posicao inicial 
     pos.Translate(x,y,z);
 }
@@ -52,6 +58,11 @@ GLfloat Player::GetYPos()
 GLfloat Player::GetZPos()
 {
     return this->pos.m[2][3];
+}
+
+GLfloat Player::GetHeight()
+{
+    return this->height;
 }
 
 void Player::DefineColor(GLfloat R, GLfloat G, GLfloat B){
@@ -190,19 +201,19 @@ void Player::Move(GLfloat inc, GLdouble tDif)
     tmp.Translate(0, 0, inc);
 
     GLfloat newX = tmp.m[0][3];
-    GLfloat newY = .0f;
+    GLfloat newY = tmp.m[1][3];
     GLfloat newZ = tmp.m[2][3];
 
-    //Collider proposed;
+    Collider proposed;
 
-    // proposed.SetParameters(newX, newY, (float)this->radius, epsilon, CollisionType::External, NULL);
+    proposed.SetParameters(newX, newY, newZ, (float)this->radius, this->GetHeight(), epsilon, CollisionType::External, NULL);
 
-    // if (gCollisionSystem->TestCollision(proposed, &this->collider)) {
-    //     return;
-    // }
+    if (gCollisionSystem->TestCollision(proposed, &this->collider)) {
+        return;
+    }
 
     this->pos.Translate(0, 0, inc);
-    // this->collider.SetCircle(newX, newY, (float)this->radius, epsilon);
+    this->collider.SetCircle(newX, newY, newZ, (float)this->radius, this->GetHeight(), epsilon);
 
     // this->CheckFootChange(tDif);
 }
@@ -220,7 +231,7 @@ void Player::ResetPosition()
 
     this->SetArmAngle(0.0f, 0.0f); 
 
-    // this->collider.SetCircle(this->GetXPos(), this->GetYPos(), (float)this->radius, epsilon);
+    this->collider.SetCircle(this->GetXPos(), this->GetYPos(), this->GetZPos(), (float)this->radius, this->GetHeight(), epsilon);
 }
 
 void Player::SetArmAngle(GLfloat degX, GLfloat degY)

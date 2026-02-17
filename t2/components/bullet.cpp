@@ -16,7 +16,7 @@ Bullet::Bullet(Alglib::Tuple3 position, Alglib::Tuple3 directionVector, Material
 
     this->material = mat;
     
-    // col.SetParameters(position.GetX(), position.GetY(), BULLET_RADIUS, 0.0f, CollisionType::External, [this](Collider* me, Collider* other){ this->DestroySelf(); });
+    col.SetParameters(position.GetX(), position.GetY(), position.GetZ(), BULLET_RADIUS, 0.0f, 0.0f, CollisionType::External, [this](Collider* me, Collider* other){ this->DestroySelf(); });
 }
 
 void Bullet::DrawSphere(GLfloat r)
@@ -53,7 +53,7 @@ void Bullet::Move(GLdouble timeDiff )
     // atualiza posição
     currentPos = Alglib::Add(currentPos, step);
 
-    // this->col.SetCircle(GetXPos(), GetYPos(), BULLET_RADIUS, 0.0f);
+    this->col.SetCircle(GetXPos(), GetYPos(), GetZPos(), BULLET_RADIUS, 0.0f, 0.0f);
 }
 
 bool Bullet::isValid()

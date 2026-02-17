@@ -7,9 +7,7 @@ extern CollisionSystem* gCollisionSystem;
 
 Collider::Collider()
 {
-    // std::lock_guard<std::mutex> lk(uidMutex);
-    // entityId = uid++;
-    circle = {0.f,0.f,0.f,0.f};
+    circle = {0.f,0.f, 0.0f, 0.0f, 0.f,0.f};
     type = CollisionType::External;
     registered = false;
     onCollision = Callback();
@@ -20,9 +18,9 @@ Collider::~Collider()
     if (registered && gCollisionSystem) gCollisionSystem->Unregister(this);
 }
 
-void Collider::SetParameters(float x, float y, float r, float epsilon, CollisionType colType, Callback cbfunc)
+void Collider::SetParameters(float x, float y, float z, float r, float h, float epsilon, CollisionType colType, Callback cbfunc)
 {
-    circle = { x, y, r, epsilon };
+    circle = { x, y, z, r, h, epsilon };
     type = colType;
     onCollision = std::move(cbfunc);
     if (!registered && gCollisionSystem) {

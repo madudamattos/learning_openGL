@@ -1,18 +1,20 @@
 #include "arena.h"
 #include <GL/glut.h>
 
-// extern CollisionSystem* gCollisionSystem;
+extern CollisionSystem* gCollisionSystem;
 
-void Arena::SetParameters(GLfloat x, GLfloat z, GLfloat r)
+void Arena::SetParameters(GLfloat x, GLfloat y, GLfloat z, GLfloat r, GLfloat height = 0.0f)
 {
     this->gX = x;
+    this->gY = x;
     this->gZ = z;
     this->radius = r;
+    this->height = height;
 
-    // collider.SetParameters(x,y, r, 0.0f, CollisionType::Internal, NULL);
+    collider.SetParameters(x, y, z, r, height, 0.0f, CollisionType::Internal, NULL);
 }
 
-void Arena::AddObstacle(GLfloat x, GLfloat y, GLfloat z, GLfloat r, GLfloat height)
+void Arena::AddObstacle(GLfloat x, GLfloat y, GLfloat z, GLfloat r, GLfloat h)
 {
     obstacles.emplace_back();
     Obstacle &dst = obstacles.back();
@@ -21,7 +23,10 @@ void Arena::AddObstacle(GLfloat x, GLfloat y, GLfloat z, GLfloat r, GLfloat heig
     dst.y = y;
     dst.z = z;
     dst.r = r;
-    dst.height = height;
+    dst.h = h;
+
+    dst.obstacleCollider.SetParameters(x, y, z, r, h, 0.0f, CollisionType::External, Collider::Callback());
+
 }
 
 void Arena::Clear()
@@ -118,7 +123,7 @@ void Arena::Draw()
     // Draw individual obstacles
     for (const auto &obs : obstacles) {
         glPushMatrix();
-        glTranslatef(obs.x, 0.0f, obs.y);
+        glTranslatef(obs.x, obs.y, obs.z);
         DrawSphere(obs.r, 0.1f,0.1f,0.2f);
         glPopMatrix();
     }

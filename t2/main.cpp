@@ -130,7 +130,7 @@ void renderScene(void)
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
     DrawAxes(70); // DEBUG
-    
+
     arena.Draw();
     player2.Draw();
     player1.Draw();
@@ -379,6 +379,9 @@ void idle(void)
         bulletP2->Move(dt);
     }
 
+    if (gCollisionSystem) gCollisionSystem->Update();
+
+
     glutPostRedisplay();
 }
  
@@ -393,8 +396,8 @@ void init(void)
 
     ResetKeyStatus();
 
-    // Projeção em perspectiva com FOV menor (menos distorção)
-    float fovy = 30.0f;                      // experimente 20..35
+    // Projeção em perspectiva com FOV menor (20-35)
+    float fovy = 30.0f;                      
     float aspect = (GLfloat)Width / (GLfloat)Height;
     float nearv = 1.0f;
     float farv  = 2000.0f;
@@ -431,13 +434,11 @@ void readSVG(const char *fileName)
     XMLElement* c2 = c1 ? c1->NextSiblingElement("circle") : nullptr;
     XMLElement* c3 = c2 ? c2->NextSiblingElement("circle") : nullptr;
 
-    GLfloat arenaCx, arenaCy, arenaR, height;
+    GLfloat arenaCx, arenaCy, arenaR, playerR, playerHeight;
     if (c1) {
         arenaCx = c1->IntAttribute("cx", 0);
         arenaCy = c1->IntAttribute("cy", 0);
         arenaR  = c1->IntAttribute("r",  0);
-
-        arena.SetParameters(0, 0, arenaR);
 
         ViewingHeight = ViewingWidth = 2 * arenaR; // MUDAR AQUI 
     }
@@ -446,7 +447,9 @@ void readSVG(const char *fileName)
         GLfloat cy = c2->IntAttribute("cy", 0);
         GLfloat r  = c2->IntAttribute("r",  0);
 
-        player2.SetParameters(arenaCx - cx, 0, - cy + arenaCy, r, [](){ gameManager.decLifePlayer2(); });
+        playerHeight = 3.65 * r;
+
+        player2.SetParameters(arenaCx - cx, 0, - cy + arenaCy, r, playerHeight, [](){ gameManager.decLifePlayer2(); });
         player2.DefineColor(1.0f, 0, 0); // Player 2 is red
     }
     if (c3) {
@@ -454,11 +457,13 @@ void readSVG(const char *fileName)
         GLfloat cy = c3->IntAttribute("cy", 0);
         GLfloat r  = c3->IntAttribute("r",  0);
 
-        height = 6*r;
+        playerHeight = 3.65 * r;
         
-        player1.SetParameters(arenaCx - cx, 0, - cy + arenaCy, r, [](){ gameManager.decLifePlayer1(); });
+        player1.SetParameters(arenaCx - cx, 0, - cy + arenaCy, r, playerHeight, [](){ gameManager.decLifePlayer1(); });
         player1.DefineColor(0, 1.0f, 0); // Player 1 is green
     }
+
+    arena.SetParameters(0, 0, 0, arenaR, 4*playerHeight);
 
     int obstacleCount = 0;
     for (XMLElement* c = c3 ? c3->NextSiblingElement("circle") : nullptr; c; c = c->NextSiblingElement("circle")) ++obstacleCount;
@@ -469,11 +474,15 @@ void readSVG(const char *fileName)
         int cy = c->IntAttribute("cy", 0);
         int r  = c->IntAttribute("r",  0);
         
-        arena.AddObstacle(arenaCx - cx, 0, - cy + arenaCy, r, 2*height);
+        arena.AddObstacle(arenaCx - cx, 0, - cy + arenaCy, r, playerHeight);
     }
 
     // ajuste para os players spawnarem olhando um pro outro
     setPlayersInitialRotation();
+
+    // DEBUG
+    std::cout << "registered colliders: " << collisionSystem.GetCount() << std::endl;
+
 }
 
 int main(int argc, char *argv[])
