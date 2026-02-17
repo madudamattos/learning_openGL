@@ -134,6 +134,12 @@ void renderScene(void)
     player2.Draw();
     player1.Draw();
 
+    // hud.Draw();
+
+    if(bulletP1) bulletP1->Draw();
+
+    if(bulletP2) bulletP2->Draw();
+
     glutSwapBuffers();
 }
 
@@ -174,10 +180,36 @@ void setPlayersInitialRotation()
 
 }
 
+void restartGame()
+{
+    // reseta os status no gameManager
+    gameManager.resetGame();
+
+    // deleta as balas
+    if(bulletP1) {
+        delete bulletP1;
+        bulletP1 = nullptr; 
+    }
+
+    if(bulletP2) {
+        delete bulletP2;
+        bulletP2 = nullptr; 
+    }
+
+    // // reseta os jogadores para a posição inicial 
+    player1.ResetPosition();
+    player2.ResetPosition();
+
+    setPlayersInitialRotation();
+}
 
 void keyPress(unsigned char key, int x, int y)
 {       
+    if(key == 'r' || key == 'R')
+        restartGame();
 
+    if(gameManager.isGameOver()) return; 
+    
     unsigned int code = static_cast<unsigned char>(key); 
     switch (code) {
         // movimentação player1 (usar keyStatus + idle)
@@ -221,16 +253,16 @@ void keyPress(unsigned char key, int x, int y)
         case (unsigned char)199: // 'Ç' (199)
             keyStatus[199] = 1;
             break;
-        // case '5':
-        //     if(!bulletP2)
-        //     {
-        //         bulletP2 = player2.Shoot();
-        //         bulletP2->SetDestroyCallback([](Bullet* b){
-        //             delete b;
-        //             bulletP2 = nullptr; 
-        //         });
-        //     }
-            // break;
+        case '5':
+            if(!bulletP2)
+            {
+                bulletP2 = player2.Shoot();
+                bulletP2->SetDestroyCallback([](Bullet* b){
+                    delete b;
+                    bulletP2 = nullptr; 
+                });
+            }
+            break;
         case 27:
             exit(0);
             break;
@@ -257,19 +289,19 @@ void onMouseMove(int x, int y)
 
 void onMouseClick(int button, int state, int x, int y)
 {
-    // if(gameManager.isGameOver()) return; 
+    if(gameManager.isGameOver()) return; 
 
-    // if(button == GLUT_LEFT_BUTTON && state == GLUT_UP)
-    // {
-    //     if(!bulletP1)
-    //     {
-    //         bulletP1 = player1.Shoot();
-    //             bulletP1->SetDestroyCallback([](Bullet* b){
-    //             delete b;
-    //             bulletP1 = nullptr; 
-    //         });
-    //     }  
-    // }
+    if(button == GLUT_LEFT_BUTTON && state == GLUT_UP)
+    {
+        if(!bulletP1)
+        {
+            bulletP1 = player1.Shoot();
+            bulletP1->SetDestroyCallback([](Bullet* b){
+                delete b;
+                bulletP1 = nullptr; 
+            });
+        }  
+    }
 }
 
 void idle(void)
@@ -336,15 +368,15 @@ void idle(void)
 
 
     // bala: chamar com dt (segundos)
-    // if(bulletP1)
-    // {
-    //     bulletP1->Move(dt);
-    // }
+    if(bulletP1)
+    {
+        bulletP1->Move(dt);
+    }
 
-    // if(bulletP2)
-    // {
-    //     bulletP2->Move(dt);
-    // }
+    if(bulletP2)
+    {
+        bulletP2->Move(dt);
+    }
 
     glutPostRedisplay();
 }

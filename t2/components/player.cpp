@@ -54,11 +54,9 @@ GLfloat Player::GetZPos()
     return this->pos.m[2][3];
 }
 
-
 void Player::DefineColor(GLfloat R, GLfloat G, GLfloat B){
     this->material.SetColor(R,G,B);
 }
-
 
 // debug function
 void Player:: DrawAxes(double size)
@@ -145,9 +143,8 @@ void Player::Draw()
     glTranslatef(radius, 0, 0); // translada pra lateral da esfera
     glRotatef(armAngle.x, 1, 0, 0); // rotaciona a arma em x
     glRotatef(armAngle.y, 0, 1, 0); // rotaciona a arma em y
-    // DrawAxes(20); // DEBUG
-    glTranslatef(0, 0, radius); // translata para desenhar a partir centro do paralelepipedo
-    DrawRect(rectWidth,rectWidth, rectHeight);
+    glTranslatef(0, 0, rectHeight/2); // translata para desenhar a partir centro do paralelepipedo
+    DrawRect(rectWidth,rectWidth, rectHeight); // desenha a arma
     glPopMatrix();
 
     // cabeça
@@ -210,6 +207,22 @@ void Player::Move(GLfloat inc, GLdouble tDif)
     // this->CheckFootChange(tDif);
 }
 
+void Player::ResetPosition()
+{
+    this->pos.Replace(Alglib::Mat3::Identity());
+    pos.Translate(this->gXinit, this->gYinit, this->gZinit);
+
+    this->bodyAngle = 0.0f;
+    this->armAngle.x = this->armAngle.y = 0.0f;
+    //this->footWalking = Foot::RightFront;
+    this->isWalking = false;
+    this->lastWalkTime = 0.0;
+
+    this->SetArmAngle(0.0f, 0.0f); 
+
+    // this->collider.SetCircle(this->GetXPos(), this->GetYPos(), (float)this->radius, epsilon);
+}
+
 void Player::SetArmAngle(GLfloat degX, GLfloat degY)
 {
     if (degX > 45.0f) degX = 45.0f;
@@ -253,7 +266,26 @@ Alglib::Mat3 Player::GetGunPos()
     m.Translate(GetXPos(), GetYPos(), GetZPos())
      .Translate(0, 0.75*radius, 0)
      .RotateY(this->bodyAngle)
-     .Translate(radius, radius*0.9, radius);
-    
-     return m;
+     .Translate(radius, radius*0.9, 0);
+
+    return m;
+}
+
+Bullet* Player::Shoot()
+{
+    Alglib::Mat3 shootPos = GetGunPos().Copy();
+ 
+    Alglib::Tuple3 bulletPos(1.0f);
+    Alglib::Tuple3 armPos(1.0f);
+
+    armPos.Alglib::Tuple3::Transform(shootPos);
+
+    shootPos.Rotate(armAngle.x, armAngle.y, 0)
+            .Translate(0, 0, rectHeight);
+
+    bulletPos.Alglib::Tuple3::Transform(shootPos);
+
+    Alglib::Tuple3 directionVector = Alglib::Subtract(bulletPos, armPos);
+
+    return new Bullet(bulletPos, directionVector);
 }

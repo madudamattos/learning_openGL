@@ -2,55 +2,34 @@
 #include <math.h>
 #include <stdio.h>
 #include <iostream>
+#include <GL/glut.h>
 
 #define DISTANCIA_MAX 300.0f 
 #define BULLET_RADIUS 5
 
 
-Bullet::Bullet(Alglib::Tuple2 position, Alglib::Tuple2 directionVector){
+Bullet::Bullet(Alglib::Tuple3 position, Alglib::Tuple3 directionVector, Material mat){
     this->initPos = position;
     this->currentPos = position;
     this->directionAng = directionVector; 
     this->gVel = SPEED;
+
+    this->material = mat;
     
-    col.SetParameters(position.GetX(), position.GetY(), BULLET_RADIUS, 0.0f, CollisionType::External, [this](Collider* me, Collider* other){ this->DestroySelf(); });
-};
+    // col.SetParameters(position.GetX(), position.GetY(), BULLET_RADIUS, 0.0f, CollisionType::External, [this](Collider* me, Collider* other){ this->DestroySelf(); });
+}
 
-
-void Bullet::DrawCircle(GLint radius, GLfloat R, GLfloat G, GLfloat B)
+void Bullet::DrawSphere(GLfloat r)
 {
-    glColor3f(R, G, B);
-    glBegin(GL_POLYGON);
-        for(int deg=0; deg<360; deg+=20)
-        {
-            float theta = deg* M_PI / 180.0f; // deg->rad
-            float x = radius * cosf(theta);
-            float y = radius * sinf(theta);
-
-            glVertex3f(x, -y, 0.0f);
-        }
-    glEnd();
-
-    // Desenha o contorno AMARELO em volta
-    glColor3f(1.0f, 1.0f, 0);
-    glLineWidth(1.0f);
-    glBegin(GL_LINE_LOOP);
-        for(int deg=0; deg<360; deg+=20)
-        {
-            float theta = deg* M_PI / 180.0f; // deg->rad
-            float x = radius * cosf(theta);
-            float y = radius * sinf(theta);
-
-            glVertex3f(x, -y, 0.0f); 
-        }
-    glEnd();
+    glutSolidSphere((GLdouble) r, 20, 10);
 }
 
 void Bullet::Draw()
-{
+{   
+    this->material.Apply(GL_FRONT_AND_BACK);
     glPushMatrix();
-    glTranslatef(currentPos.GetX(), currentPos.GetY(), 0);
-    DrawCircle(BULLET_RADIUS, 1.0f, 1.0f, 1.0f);
+    glTranslatef(currentPos.GetX(), currentPos.GetY(), currentPos.GetZ());
+    DrawSphere(BULLET_RADIUS);
     glPopMatrix();
 }
 
@@ -59,27 +38,30 @@ void Bullet::Move(GLdouble timeDiff )
     // normaliza os vetores
     float dx = directionAng.GetX();
     float dy = directionAng.GetY();
-    float len = sqrtf(dx*dx + dy*dy);
+    float dz = directionAng.GetZ();
+
+    float len = sqrtf(dx*dx + dy*dy + dz*dz);
     if (len <= 1e-6f) return; // direção inválida, não move
 
-    dx /= len; dy /= len;
+    dx /= len; dy /= len; dz /= len;
 
     // deslocamento = direção_normalizada * velocidade * delta_time
     float travel = gVel * (float)timeDiff;
 
-    Alglib::Tuple2 step(dx * travel, dy * travel, 0.0f);
+    Alglib::Tuple3 step(dx * travel, dy * travel, dz * travel);
 
     // atualiza posição
     currentPos = Alglib::Add(currentPos, step);
 
-    this->col.SetCircle(GetXPos(), GetYPos(), BULLET_RADIUS, 0.0f);
+    // this->col.SetCircle(GetXPos(), GetYPos(), BULLET_RADIUS, 0.0f);
 }
 
 bool Bullet::isValid()
 {
     float dx = currentPos.GetX() - initPos.GetX();
     float dy = currentPos.GetY() - initPos.GetY();
-    float dist = sqrtf(dx*dx + dy*dy);
+    float dz = currentPos.GetZ() - initPos.GetZ();
+    float dist = sqrtf(dx*dx + dy*dy + dz*dz);
     return dist <= DISTANCIA_MAX;
 }
 
