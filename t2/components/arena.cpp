@@ -1,24 +1,25 @@
 #include "arena.h"
 #include <GL/glut.h>
 
-extern CollisionSystem* gCollisionSystem;
+// extern CollisionSystem* gCollisionSystem;
 
-void Arena::SetParameters(GLfloat x, GLfloat y, GLfloat r)
+void Arena::SetParameters(GLfloat x, GLfloat z, GLfloat r)
 {
     this->gX = x;
-    this->gY = y;
+    this->gZ = z;
     this->radius = r;
 
     // collider.SetParameters(x,y, r, 0.0f, CollisionType::Internal, NULL);
 }
 
-void Arena::AddObstacle(GLfloat x, GLfloat y, GLfloat r, GLfloat height)
+void Arena::AddObstacle(GLfloat x, GLfloat y, GLfloat z, GLfloat r, GLfloat height)
 {
     obstacles.emplace_back();
     Obstacle &dst = obstacles.back();
 
     dst.x = x;
     dst.y = y;
+    dst.z = z;
     dst.r = r;
     dst.height = height;
 }

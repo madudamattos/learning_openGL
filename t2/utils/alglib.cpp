@@ -1,5 +1,6 @@
 #include "alglib.h"
 #include <iostream>
+#include <iomanip>
 
 namespace Alglib
 {
@@ -116,6 +117,7 @@ namespace Alglib
 
     void Mat2::Print() const
     {
+        // std::cout << std::fixed << std::setprecision(2); // DEBUG
         for(int i=0; i<3; i++)
         {
             std::cout << "[";

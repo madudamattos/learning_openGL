@@ -16,10 +16,11 @@
 
 class Player
 {
-    GLint gXinit, gYinit, radius;
+    GLint gXinit, gYinit, gZinit, radius;
     Material material;
-    GLfloat armAngle, bodyAngle;
-    Alglib::Mat2 pos, gunPos; 
+    GLfloat bodyAngle;
+    Alglib::Tuple3 armAngle;
+    Alglib::Mat3 pos, gunPos; 
     bool isWalking;
     GLdouble lastWalkTime;
     Collider collider;
@@ -31,7 +32,6 @@ class Player
 
     public:
         enum class Foot { LeftFront = 0, RightFront = 1 };
-        void SetPlayerCallback(PlayerCallback cb);
 
     private:
         Foot footWalking; 
@@ -39,25 +39,15 @@ class Player
     public:
         Player();
 
-        void SetParameters(GLint x, GLint y, GLint rad, std::function<void()> onCollision);
+        void SetParameters(GLfloat x, GLfloat y, GLfloat z, GLfloat rad, std::function<void()> onCollision);
 
         void DefineColor(GLfloat R, GLfloat G, GLfloat B);
 
         void Draw();
 
-        void SetFootWalking(Foot value);
-        Foot GetFootWalking() const { return footWalking; }
-
-        void SetWalkTime(GLdouble t) { lastWalkTime = t; };
-        void CheckFootChange(GLdouble t);
-
         void SetIsWalking(bool value) { isWalking = value; }
         bool GetIsWalking() const { return isWalking; }
 
-        void SetArmAngle(GLfloat degrees);
-        void IncreaseArmAngle(GLfloat inc);
-        GLfloat GetArmAngle() const { return armAngle; }
-        
         void Rotate(GLfloat inc, GLdouble tDif);
         GLfloat GetBodyRotation() { return bodyAngle; }
 
@@ -67,13 +57,13 @@ class Player
         
         GLfloat GetYPos();
         GLfloat GetXPos();
+        GLfloat GetZPos();
 
         void ResetPosition();
         
         Bullet* Shoot();
 
     private:
-        void DrawElipse(GLint radius, GLfloat R, GLfloat G, GLfloat B, bool isCircle);
         void DrawRect(GLfloat sx, GLfloat sy, GLfloat sz);
         void DrawSphere(GLfloat r);
 };
