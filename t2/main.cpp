@@ -130,11 +130,12 @@ void renderScene(void)
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
     DrawAxes(70); // DEBUG
+    
     arena.Draw();
     player2.Draw();
     player1.Draw();
 
-    // hud.Draw();
+    hud.Draw();
 
     if(bulletP1) bulletP1->Draw();
 
@@ -477,6 +478,9 @@ void readSVG(const char *fileName)
 
 int main(int argc, char *argv[])
 {
+    gCollisionSystem = &collisionSystem;
+    refGameManager = &gameManager;
+    
     readSVG(argv[1]);
     
     // Initialize openGL with Double buffer and RGB color without transparency.

@@ -76,6 +76,14 @@ void HUD::Draw() {
     // antes de desenhar faz um update no estado do jogo 
     currentScreen = refGameManager->isGameOver() ? Screen::gameOver : Screen::baseHUD; 
     
+    // salva estados relevantes (lighting/depth/texture) e define projeção para coordenadas em pixels (origem top-left)
+    glPushAttrib(GL_ENABLE_BIT);
+    // desenhar HUD em cima da cena: desabilita teste de profundidade, iluminação, texturas e face culling
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_CULL_FACE);
+
     // salva e define projeção para coordenadas em pixels (origem top-left)
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
@@ -97,4 +105,7 @@ void HUD::Draw() {
     glMatrixMode(GL_PROJECTION);
     glPopMatrix(); // PROJECTION
     glMatrixMode(GL_MODELVIEW);
+
+    // restaura estados anteriores (depth/light/texture)
+    glPopAttrib();
 }
