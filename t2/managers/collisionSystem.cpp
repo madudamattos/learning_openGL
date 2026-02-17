@@ -29,32 +29,124 @@ void CollisionSystem::CheckPair(Collider* A, Collider* B) {
     }
 }
 
+// bool CollisionSystem::CheckCollision(const Collider& A, const Collider& B) {
+    
+//     float dx, dz, rsum, dist2;
+
+//     if(B.type == CollisionType::Internal && A.type == CollisionType::External)
+//     {
+//         dx = A.circle.x - B.circle.x;
+//         dz = A.circle.z - B.circle.z;
+//         rsum = A.circle.r + B.circle.r;
+//         dist2 = dx*dx + dz*dz;
+//         return B.circle.r - sqrt(dist2) <= A.circle.r;
+//     } 
+//     else if(A.type == CollisionType::Internal && B.type == CollisionType::External)
+//     {
+//         dx = A.circle.x - B.circle.x;
+//         dz = A.circle.z - B.circle.z;
+//         rsum = A.circle.r + B.circle.r;
+//         dist2 = dx*dx + dz*dz;
+//         return A.circle.r - sqrt(dist2) <= B.circle.r;
+//     }
+    
+//     dx = A.circle.x - B.circle.x;
+//     dz = A.circle.z - B.circle.z;
+//     rsum = A.circle.r + B.circle.r;
+//     dist2 = dx*dx + dz*dz;
+    
+//     return dist2 <= rsum * rsum;
+// }
+
 bool CollisionSystem::CheckCollision(const Collider& A, const Collider& B) {
     
     float dx, dz, rsum, dist2;
 
-    if(B.type == CollisionType::Internal && A.type == CollisionType::External)
+    // casos com Internal/External originais (mantidos)
+    if (B.type == CollisionType::Internal && A.type == CollisionType::External)
     {
         dx = A.circle.x - B.circle.x;
         dz = A.circle.z - B.circle.z;
         rsum = A.circle.r + B.circle.r;
-        dist2 = dx*dx + dz*dz;
-        return B.circle.r - sqrt(dist2) <= A.circle.r;
-    } 
-    else if(A.type == CollisionType::Internal && B.type == CollisionType::External)
-    {
-        dx = A.circle.x - B.circle.x;
-        dz = A.circle.z - B.circle.z;
-        rsum = A.circle.r + B.circle.r;
-        dist2 = dx*dx + dz*dz;
-        return A.circle.r - sqrt(dist2) <= B.circle.r;
+        dist2 = dx * dx + dz * dz;
+
+        if (B.circle.r - sqrt(dist2) <= A.circle.r)
+        {
+            float A_bottom = A.circle.y;
+            float A_top    = A.circle.y + A.circle.h;
+            float B_bottom = B.circle.y;
+            float B_top    = B.circle.y + B.circle.h;
+            if (A_bottom <= B_top && A_top >= B_bottom) return true;
+        }
+        return false;
     }
-    
+    else if (A.type == CollisionType::Internal && B.type == CollisionType::External)
+    {
+        dx = A.circle.x - B.circle.x;
+        dz = A.circle.z - B.circle.z;
+        rsum = A.circle.r + B.circle.r;
+        dist2 = dx * dx + dz * dz;
+
+        if (A.circle.r - sqrt(dist2) <= B.circle.r)
+        {
+            float A_bottom = A.circle.y;
+            float A_top    = A.circle.y + A.circle.h;
+            float B_bottom = B.circle.y;
+            float B_top    = B.circle.y + B.circle.h;
+            if (A_bottom <= B_top && A_top >= B_bottom) return true;
+        }
+        return false;
+    }
+
+    // --- dois externos: calcular separação horizontal ANTES do teste ---
     dx = A.circle.x - B.circle.x;
     dz = A.circle.z - B.circle.z;
     rsum = A.circle.r + B.circle.r;
-    dist2 = dx*dx + dz*dz;
-    return dist2 <= rsum * rsum;
+    dist2 = dx * dx + dz * dz;
+
+    // região de colisão em XZ; só se isto for verdade checamos altura (Y)
+    if (dist2 <= rsum * rsum)
+    {
+        // A = cilindro, B = esfera
+        if (A.circle.h > 0 && B.circle.h == 0)
+        {
+            float A_bottom = A.circle.y;
+            float A_top    = A.circle.y + A.circle.h;
+            float B_bottom = B.circle.y - B.circle.r;
+            float B_top    = B.circle.y + B.circle.r;
+            if (A_bottom <= B_top && A_top >= B_bottom) return true;
+        }
+
+        // A = esfera, B = cilindro
+        if (A.circle.h == 0 && B.circle.h > 0)
+        {
+            float A_bottom = A.circle.y - A.circle.r;
+            float A_top    = A.circle.y + A.circle.r;
+            float B_bottom = B.circle.y;
+            float B_top    = B.circle.y + B.circle.h;
+            if (A_bottom <= B_top && A_top >= B_bottom) return true;
+        }
+
+        // ambos cilindros
+        if (A.circle.h > 0 && B.circle.h > 0)
+        {
+            float A_bottom = A.circle.y;
+            float A_top    = A.circle.y + A.circle.h;
+            float B_bottom = B.circle.y;
+            float B_top    = B.circle.y + B.circle.h;
+            if (A_bottom < B_top && A_top > B_bottom) return true;
+        }
+
+        // ambos esferas (vertical overlap já garantida porque h==0 -> sphere extends +/- r)
+        if (A.circle.h == 0 && B.circle.h == 0)
+        {
+            float dy = A.circle.y - B.circle.y;
+            // já sabemos separação horizontal <= rsum; verificar 3D
+            if (dy*dy + dist2 <= rsum * rsum) return true;
+        }
+    }
+
+    return false;
 }
 
 bool CollisionSystem::TestCollision(const Collider& collider, const Collider* ignore) {

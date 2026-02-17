@@ -12,7 +12,7 @@
 #include "../utils/material.h"
 
 #define rectWidth 10
-#define rectHeight 40
+#define rectHeight 45
 
 class Player
 {

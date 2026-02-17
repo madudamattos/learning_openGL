@@ -1,6 +1,8 @@
 #include "arena.h"
 #include <GL/glut.h>
 
+#define heightOffset 0.2f
+
 extern CollisionSystem* gCollisionSystem;
 
 void Arena::SetParameters(GLfloat x, GLfloat y, GLfloat z, GLfloat r, GLfloat height = 0.0f)
@@ -25,8 +27,7 @@ void Arena::AddObstacle(GLfloat x, GLfloat y, GLfloat z, GLfloat r, GLfloat h)
     dst.r = r;
     dst.h = h;
 
-    dst.obstacleCollider.SetParameters(x, y, z, r, h, 0.0f, CollisionType::External, Collider::Callback());
-
+    dst.obstacleCollider.SetParameters(x, y + + heightOffset, z, r, h, 0.0f, CollisionType::External, Collider::Callback());
 }
 
 void Arena::Clear()

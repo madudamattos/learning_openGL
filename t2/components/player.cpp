@@ -3,7 +3,8 @@
 #include <GL/glut.h>
 
 #define timeOffset 0.4f // intervalo em segundos entre troca de perna
-#define epsilon 0.0f 
+#define epsilon 0.0f
+#define heightOffset 0.2f
 
 // extern CollisionSystem* gCollisionSystem;
 
@@ -38,7 +39,7 @@ void Player::SetParameters(GLfloat x, GLfloat y, GLfloat z, GLfloat rad, GLfloat
     this->isWalking = false;
     
     // inicia colisor 
-    collider.SetParameters(x,y, z, rad, height, epsilon, CollisionType::External, [onCollision](Collider*, Collider*){if (onCollision) onCollision();});
+    collider.SetParameters(x,y + heightOffset, z, rad, height, epsilon, CollisionType::External, [onCollision](Collider*, Collider*){if (onCollision) onCollision();});
 
 
     // seta matriz de posicao inicial 

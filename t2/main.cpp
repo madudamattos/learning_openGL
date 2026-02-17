@@ -115,15 +115,15 @@ void renderScene(void)
 
     // DEBUG: VISTA ANGULADA
     // position camera on +Y looking to origin, Z is up
-    // gluLookAt(300.0f, eyeDist * 0.2, -700.0f,   // eye
-    //           0.0f, 0.0f, 0.0f,      // center
-    //           0.0f, 1.0f, 0.0f);     // up = Z
+    gluLookAt(300.0f, eyeDist * 0.2, -700.0f,   // eye
+              0.0f, 0.0f, 0.0f,      // center
+              0.0f, 1.0f, 0.0f);     // up = Z
 
 
     // DEBUG: VISTA DE CIMA 
-    gluLookAt(0, 1100, 0,   // eye
-              0.0f, 0.0f, 0.0f,      // center
-              0.0f, 0.0f, 1.0f);     // up = Z
+    // gluLookAt(0, 1100, 0,   // eye
+    //           0.0f, 0.0f, 0.0f,      // center
+    //           0.0f, 0.0f, 1.0f);     // up = Z
 
     // update light position to follow camera (optional but usually desirable)
     GLfloat light_position[] = { 0.0f, eyeDist, 0.0f, 1.0f };
