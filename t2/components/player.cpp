@@ -23,7 +23,6 @@ Player::Player(){
     this->bodyAngle = 0.0f;
 
     this->pos = Alglib::Mat3::Identity();
-    this->gunPos = Alglib::Mat3::Identity();
 }
 
 void Player::SetParameters(GLfloat x, GLfloat y, GLfloat z, GLfloat rad, std::function<void()> onCollision = nullptr){
@@ -58,6 +57,51 @@ GLfloat Player::GetZPos()
 
 void Player::DefineColor(GLfloat R, GLfloat G, GLfloat B){
     this->material.SetColor(R,G,B);
+}
+
+
+// debug function
+void Player:: DrawAxes(double size)
+{
+    GLfloat mat_ambient_r[] = { 1.0, 0.0, 0.0, 1.0 };
+    GLfloat mat_ambient_g[] = { 0.0, 1.0, 0.0, 1.0 };
+    GLfloat mat_ambient_b[] = { 0.0, 0.0, 1.0, 1.0 };
+    GLfloat no_mat[] = { 0.0, 0.0, 0.0, 1.0 };
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, 
+            no_mat);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, no_mat);
+    glMaterialfv(GL_FRONT, GL_SHININESS, no_mat);
+
+    //x axis red
+    glPushMatrix();
+        glMaterialfv(GL_FRONT, GL_EMISSION, 
+                mat_ambient_r);
+        glColor3fv(mat_ambient_r);
+        glScalef(size, size*0.1, size*0.1);
+        glTranslatef(0.5, 0, 0); // put in one end
+        glutSolidCube(1.0);
+    glPopMatrix();
+
+    //y axis green
+    glPushMatrix();
+        glMaterialfv(GL_FRONT, GL_EMISSION, 
+                mat_ambient_g);
+        glColor3fv(mat_ambient_g);
+        glRotatef(90,0,0,1);
+        glScalef(size, size*0.1, size*0.1);
+        glTranslatef(0.5, 0, 0); // put in one end
+        glutSolidCube(1.0);
+    glPopMatrix();
+
+    //z axis blue
+    glPushMatrix();
+        glMaterialfv(GL_FRONT, GL_EMISSION, mat_ambient_b);
+        glColor3fv(mat_ambient_b);
+        glRotatef(-90,0,1,0);
+        glScalef(size, size*0.1, size*0.1);
+        glTranslatef(0.5, 0, 0); // put in one end
+        glutSolidCube(1.0);
+    glPopMatrix();    
 }
 
 void Player::DrawRect(GLfloat sx, GLfloat sy, GLfloat sz)
@@ -98,7 +142,11 @@ void Player::Draw()
     glTranslatef(gX, 0.75*radius, gZ);
     glRotatef(bodyAngle, 0, 1, 0);
     glTranslatef(0, radius*0.9, 0); // translada pro meio do corpo
-    glTranslatef(radius, 0, radius); // translada pra lateral da esfera
+    glTranslatef(radius, 0, 0); // translada pra lateral da esfera
+    glRotatef(armAngle.x, 1, 0, 0); // rotaciona a arma em x
+    glRotatef(armAngle.y, 0, 1, 0); // rotaciona a arma em y
+    // DrawAxes(20); // DEBUG
+    glTranslatef(0, 0, radius); // translata para desenhar a partir centro do paralelepipedo
     DrawRect(rectWidth,rectWidth, rectHeight);
     glPopMatrix();
 
@@ -160,4 +208,52 @@ void Player::Move(GLfloat inc, GLdouble tDif)
     // this->collider.SetCircle(newX, newY, (float)this->radius, epsilon);
 
     // this->CheckFootChange(tDif);
+}
+
+void Player::SetArmAngle(GLfloat degX, GLfloat degY)
+{
+    if (degX > 45.0f) degX = 45.0f;
+    if (degX < -45.0f) degX = -45.0f;
+
+    if (degY > 45.0f) degY = 45.0f;
+    if (degY < -45.0f) degY = -45.0f;
+    
+    this->armAngle.x = degY;
+    this->armAngle.y = degX;
+
+    Alglib::Mat3 m = Alglib::Mat3::Identity();
+
+    m = GetGunPos().Copy();
+
+    m.Rotate(this->armAngle.x, this->armAngle.y, 0);
+    
+    this->gunPos.Replace(m);
+}
+
+void Player::IncreaseArmAngle(GLfloat incX, GLfloat incY)
+{
+    this->armAngle.x += incX;
+    this->armAngle.y += incY;
+
+    if (this->armAngle.x > 45.0f) this->armAngle.x = 45.0f;
+    else if (this->armAngle.x < -45.0f) this->armAngle.x = -45.0f;
+
+    if (this->armAngle.y > 45.0f) this->armAngle.y = 45.0f;
+    else if (this->armAngle.y < -45.0f) this->armAngle.y = -45.0f;
+
+    Alglib::Mat3 m = GetGunPos().Copy();
+    m.Rotate(this->armAngle.x, this->armAngle.y, 0);
+    this->gunPos.Replace(m);
+}
+
+Alglib::Mat3 Player::GetGunPos()
+{
+    Alglib::Mat3 m = Alglib::Mat3::Identity();
+
+    m.Translate(GetXPos(), GetYPos(), GetZPos())
+     .Translate(0, 0.75*radius, 0)
+     .RotateY(this->bodyAngle)
+     .Translate(radius, radius*0.9, radius);
+    
+     return m;
 }

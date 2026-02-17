@@ -50,11 +50,16 @@ class Player
 
         void Rotate(GLfloat inc, GLdouble tDif);
         GLfloat GetBodyRotation() { return bodyAngle; }
-
         void SetRotation(GLfloat angle);
 
         void Move(GLfloat inc, GLdouble tDif); 
         
+        void SetArmAngle(GLfloat degX, GLfloat degY);
+        void IncreaseArmAngle(GLfloat incX, GLfloat degY);
+
+        Alglib::Tuple3 GetArmAngle() const { return armAngle; }
+        Alglib::Mat3 GetGunPos();
+
         GLfloat GetYPos();
         GLfloat GetXPos();
         GLfloat GetZPos();
@@ -66,6 +71,7 @@ class Player
     private:
         void DrawRect(GLfloat sx, GLfloat sy, GLfloat sz);
         void DrawSphere(GLfloat r);
+        void DrawAxes(double size);
 };
 
 #endif

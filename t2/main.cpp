@@ -115,15 +115,15 @@ void renderScene(void)
 
     // DEBUG: VISTA ANGULADA
     // position camera on +Y looking to origin, Z is up
-    gluLookAt(300.0f, eyeDist * 0.2, -700.0f,   // eye
-              0.0f, 0.0f, 0.0f,      // center
-              0.0f, 1.0f, 0.0f);     // up = Z
+    // gluLookAt(300.0f, eyeDist * 0.2, -700.0f,   // eye
+    //           0.0f, 0.0f, 0.0f,      // center
+    //           0.0f, 1.0f, 0.0f);     // up = Z
 
 
     // DEBUG: VISTA DE CIMA 
-    // gluLookAt(0, 1100, 0,   // eye
-    //           0.0f, 0.0f, 0.0f,      // center
-    //           0.0f, 0.0f, 1.0f);     // up = Z
+    gluLookAt(0, 1100, 0,   // eye
+              0.0f, 0.0f, 0.0f,      // center
+              0.0f, 0.0f, 1.0f);     // up = Z
 
     // update light position to follow camera (optional but usually desirable)
     GLfloat light_position[] = { 0.0f, eyeDist, 0.0f, 1.0f };
@@ -152,7 +152,7 @@ void ResetKeyStatus()
 }
 
 
-void setPlayersInicialRotation()
+void setPlayersInitialRotation()
 {
     // coloca os personagens na posição certa
     Alglib::Tuple2 p1(player1.GetXPos(), player1.GetZPos(), 1.0f);
@@ -168,9 +168,9 @@ void setPlayersInicialRotation()
     angP1 += orientationOffset;
     angP2 += orientationOffset;
 
-    player1.SetRotation((GLfloat)-angP1);
+    player1.SetRotation((GLfloat)angP1);
 
-    player2.SetRotation((GLfloat)-angP2);
+    player2.SetRotation((GLfloat)angP2);
 
 }
 
@@ -193,14 +193,19 @@ void keyPress(unsigned char key, int x, int y)
         case 's': case 'S':
             keyStatus[(int)('s')] = 1;
             break;
-        // gun rotation
-        // case '4':
-        //     keyStatus[(int)('4')] = 1;
-        //     break;
-        // case '6':
-        //     keyStatus[(int)('6')] = 1;
-        //     break;
-        // player2 
+        // player 2 
+        case '4':
+            keyStatus[(int)('4')] = 1;
+            break;
+        case '6':
+            keyStatus[(int)('6')] = 1;
+            break;
+        case '8':
+            keyStatus[(int)('8')] = 1;
+            break;
+        case '2':
+            keyStatus[(int)('2')] = 1;
+            break;
         case 'o': case 'O':
             keyStatus[(int)('o')] = 1;
             break;
@@ -234,33 +239,38 @@ void keyPress(unsigned char key, int x, int y)
     }
 }
 
-// void onMouseMove(int x, int y)
-// {
-//     if(gameManager.isGameOver()) return; 
+void onMouseMove(int x, int y)
+{
+    if(gameManager.isGameOver()) return; 
 
-//     float mouseX = (float)x/(float)WINDOW_SIZE;
+    float mouseX = (float)x/(float)WINDOW_SIZE;
 
-//     GLfloat theta = GUN_ANGLE - mouseX * GUN_ANGLE * 2;
+    GLfloat thetaX = GUN_ANGLE - mouseX * GUN_ANGLE * 2;
 
-//     player1.SetArmAngle(theta);
-// }
+    float mouseY = (float)y/(float)WINDOW_SIZE;
 
-// void onMouseClick(int button, int state, int x, int y)
-// {
-//     if(gameManager.isGameOver()) return; 
+    GLfloat thetaY = GUN_ANGLE - mouseY * GUN_ANGLE * 2;
 
-//     if(button == GLUT_LEFT_BUTTON && state == GLUT_UP)
-//     {
-//         if(!bulletP1)
-//         {
-//             bulletP1 = player1.Shoot();
-//                 bulletP1->SetDestroyCallback([](Bullet* b){
-//                 delete b;
-//                 bulletP1 = nullptr; 
-//             });
-//         }  
-//     }
-// }
+    player1.SetArmAngle(thetaX, thetaY);
+
+}
+
+void onMouseClick(int button, int state, int x, int y)
+{
+    // if(gameManager.isGameOver()) return; 
+
+    // if(button == GLUT_LEFT_BUTTON && state == GLUT_UP)
+    // {
+    //     if(!bulletP1)
+    //     {
+    //         bulletP1 = player1.Shoot();
+    //             bulletP1->SetDestroyCallback([](Bullet* b){
+    //             delete b;
+    //             bulletP1 = nullptr; 
+    //         });
+    //     }  
+    // }
+}
 
 void idle(void)
 {
@@ -316,6 +326,25 @@ void idle(void)
     {
         player2.Rotate((GLfloat)((double)-ANGULAR_SPEED * dt), ct);
     }
+
+    // Player 2 gun rotation (também com dt)
+    if(keyStatus[(int)('4')])  player2.IncreaseArmAngle(0, (GLfloat)((double)ANGULAR_SPEED * dt));
+    if(keyStatus[(int)('6')])  player2.IncreaseArmAngle(0, (GLfloat)((double)-ANGULAR_SPEED * dt));
+
+    if(keyStatus[(int)('8')])  player2.IncreaseArmAngle((GLfloat)((double)ANGULAR_SPEED * dt), 0);
+    if(keyStatus[(int)('2')])  player2.IncreaseArmAngle((GLfloat)((double)-ANGULAR_SPEED * dt), 0);
+
+
+    // bala: chamar com dt (segundos)
+    // if(bulletP1)
+    // {
+    //     bulletP1->Move(dt);
+    // }
+
+    // if(bulletP2)
+    // {
+    //     bulletP2->Move(dt);
+    // }
 
     glutPostRedisplay();
 }
@@ -409,6 +438,9 @@ void readSVG(const char *fileName)
         
         arena.AddObstacle(arenaCx - cx, 0, - cy + arenaCy, r, 2*height);
     }
+
+    // ajuste para os players spawnarem olhando um pro outro
+    setPlayersInitialRotation();
 }
 
 int main(int argc, char *argv[])
@@ -434,8 +466,8 @@ int main(int argc, char *argv[])
     glutKeyboardFunc(keyPress);
     glutKeyboardUpFunc(keyUp);
 
-    // glutPassiveMotionFunc(onMouseMove);
-    // glutMouseFunc(onMouseClick);
+    glutPassiveMotionFunc(onMouseMove);
+    glutMouseFunc(onMouseClick);
     
     init();
 
