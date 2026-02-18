@@ -38,7 +38,7 @@ void HUD::DrawGameOverScreen()
 {
     const std::string go = "GAME OVER";
     int sx = (windowWidth / 4) - (int)go.size() * 4;
-    DrawText(sx, windowHeight / 3, go.c_str());
+    DrawText(sx, (windowHeight - 200) / 3, go.c_str());
 
     std::string winner;
 
@@ -47,7 +47,7 @@ void HUD::DrawGameOverScreen()
     if(refGameManager->getWinner() == Winner::None) winner = "No winners!";
 
     sx = (windowWidth / 4) - (int)winner.size() * 4;
-    DrawText(sx, windowHeight / 3 + 20, winner.c_str());
+    DrawText(sx, (windowHeight - 200) / 3 + 20, winner.c_str());
 }
 
 void HUD::DrawBaseHUD()
@@ -88,7 +88,7 @@ void HUD::Draw() {
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
-    glOrtho(0, windowWidth/2, windowHeight, 0, -1, 1); // origem no topo-left
+    glOrtho(0, windowWidth/2, windowHeight - 200, 0, -1, 1); // origem no topo-left
 
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();

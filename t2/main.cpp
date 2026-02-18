@@ -22,7 +22,7 @@ using namespace tinyxml2;
 
 // Window dimensions
 const GLint Width = 800;
-const GLint Height = 500;
+const GLint Height = 700;
 
 // Viewing dimensions
 GLint ViewingWidth;
@@ -52,7 +52,7 @@ int keyStatus[256];
 GLfloat playerHeight, playerRadius;
 GLfloat camDist = 0.0f, camHeight = 0.0f, camXYAngle = -10.0f, camXZAngle = 0.0f;
 
-int toggleCam = 0, rightButtonDown = 0, lastX = 0, lastY = 0;
+int toggleCam = 0, lights = 1, rightButtonDown = 0, lastX = 0, lastY = 0;
 
 // debug function
 void DrawAxes(double size)
@@ -134,6 +134,9 @@ void renderScene(void)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glMatrixMode(GL_PROJECTION);
+
+    if(lights) glEnable(GL_LIGHT0);
+    else glDisable(GL_LIGHT0);
 
     // VIEWPORT PLAYER 1
 
@@ -340,6 +343,10 @@ void keyPress(unsigned char key, int x, int y)
         case '-':
             keyStatus[(int)('-')] = 1;
             break;
+        // iluminação
+        case 'n':
+            lights = !lights;
+            break;
         case 27:
             exit(0);
             break;
@@ -425,13 +432,6 @@ void idle(void)
     if(keyStatus[(int)('v')]) toggleCam = 0;
     else if(keyStatus[(int)('b')]) toggleCam = 1;
     
-
-    // if(toggleCam == 0)      // Primeira pessoa
-    //     changeCamera(85, Width, Height);
-    // else                    // Terceira pessoa
-    //     changeCamera(30, Width, Height);
-
-
     // zoom da camera
     if(keyStatus[(int)('=')])
     {
@@ -526,6 +526,7 @@ void init(void)
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     glEnable(GL_DEPTH_TEST);
+
 
     GLfloat light_ambient[]  = { 0.5f, 0.5f, 0.5f, 1.0f };
     GLfloat light_diffuse[]  = { 1.0f, 1.0f, 1.0f, 1.0f };
