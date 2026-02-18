@@ -12,13 +12,15 @@ enum class Screen {
 class HUD {
     GLint windowHeight;
     GLint windowWidth;
+    GLint heightEye;
     Screen currentScreen;
 
 public:
-    HUD(int w, int h)
+    HUD(int w, int h, int he)
     {
         this->windowHeight = h;
         this->windowWidth = w;
+        this->heightEye = he;
         this->currentScreen = Screen::baseHUD;
     }
 

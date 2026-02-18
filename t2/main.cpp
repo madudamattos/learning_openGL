@@ -14,7 +14,8 @@
 
 using namespace tinyxml2;
 
-#define WINDOW_SIZE 500
+#define WINDOW_WIDTH 800
+#define WINDOW_HEIGHT 700
 #define GUN_ANGLE 45
 #define LINEAR_SPEED 150.0
 #define ANGULAR_SPEED 100.0
@@ -22,7 +23,8 @@ using namespace tinyxml2;
 
 // Window dimensions
 const GLint Width = 800;
-const GLint Height = 700;
+const GLint Height = 500;
+const GLint HeightEye = 200;
 
 // Viewing dimensions
 GLint ViewingWidth;
@@ -42,7 +44,7 @@ CollisionSystem* gCollisionSystem = nullptr; // ponteiro inicializado em main()
 Bullet* bulletP1 = NULL; // apenas uma bala por vez do player 1
 Bullet* bulletP2 = NULL; // apenas uma bala por vez do player 2
 
-HUD hud(Width, Height);
+HUD hud(Width, Height, HeightEye);
 
 static char str[1000];
 void * font = GLUT_BITMAP_9_BY_15;
@@ -359,11 +361,11 @@ void onMouseMove(int x, int y)
 {
     if(gameManager.isGameOver()) return; 
 
-    float mouseX = (float)x/(float)WINDOW_SIZE;
+    float mouseX = (float)x/(float)WINDOW_WIDTH;
 
     GLfloat thetaX = GUN_ANGLE - mouseX * GUN_ANGLE * 2;
 
-    float mouseY = (float)y/(float)WINDOW_SIZE;
+    float mouseY = (float)y/(float)Height;
 
     GLfloat thetaY = GUN_ANGLE - mouseY * GUN_ANGLE * 2;
 
@@ -639,7 +641,7 @@ int main(int argc, char *argv[])
                         GLUT_DEPTH);
 
     // Create the window.
-    glutInitWindowSize(Width, Height);
+    glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     glutInitWindowPosition(150,50);
     glutCreateWindow("Arena");
  
