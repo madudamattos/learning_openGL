@@ -49,6 +49,11 @@ void * font = GLUT_BITMAP_9_BY_15;
 
 int keyStatus[256];
 
+GLfloat playerHeight, playerRadius;
+GLfloat camDist = 0.0f, camHeight = 0.0f, camXYAngle = -10.0f, camXZAngle = 0.0f;
+
+int toggleCam = 0, rightButtonDown = 0, lastX = 0, lastY = 0;
+
 // debug function
 void DrawAxes(double size)
 {
@@ -100,33 +105,71 @@ void renderScene(void)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    // Use the same fovy used in init() and compute a camera distance that
-    // fits the whole "ViewingHeight" in view (minimal perspective distortion).
-    const float fovy_deg = 30.0f; // must match init()'s fovy
-    const float fovy_rad = fovy_deg * (float)M_PI / 180.0f;
-    const float halfViewHeight = (float)ViewingHeight * 0.5f;
+    // // Use the same fovy used in init() and compute a camera distance that
+    // // fits the whole "ViewingHeight" in view (minimal perspective distortion).
+    // const float fovy_deg = 30.0f; // must match init()'s fovy
+    // const float fovy_rad = fovy_deg * (float)M_PI / 180.0f;
+    // const float halfViewHeight = (float)ViewingHeight * 0.5f;
 
-    // distance so that the vertical span at z=0 equals ViewingHeight
-    float eyeDist = (halfViewHeight / tanf(fovy_rad * 0.5f));
+    // // distance so that the vertical span at z=0 equals ViewingHeight
+    // float eyeDist = (halfViewHeight / tanf(fovy_rad * 0.5f));
 
-    // small margin so edges are not clipped
-    const float margin = 1.05f;
-    eyeDist *= margin;
+    // // small margin so edges are not clipped
+    // const float margin = 1.05f;
+    // eyeDist *= margin;
 
-    // DEBUG: VISTA ANGULADA
-    // position camera on +Y looking to origin, Z is up
-    gluLookAt(300.0f, eyeDist * 0.2, -700.0f,   // eye
-              0.0f, 0.0f, 0.0f,      // center
-              0.0f, 1.0f, 0.0f);     // up = Z
-
-
-    // DEBUG: VISTA DE CIMA 
+    // // position camera on +Y looking to origin, Z is up
+    // gluLookAt(300.0f, eyeDist * 0.2, -700.0f,   // eye
+    //         0.0f, 0.0f, 0.0f,      // center
+    //         0.0f, 1.0f, 0.0f);     // up = Z
+            
+    
+    //  camera vista de cima
     // gluLookAt(0, 1100, 0,   // eye
-    //           0.0f, 0.0f, 0.0f,      // center
-    //           0.0f, 0.0f, 1.0f);     // up = Z
+    //     0.0f, 0.0f, 0.0f,      // center
+    //     0.0f, 0.0f, 1.0f);     // up = Z
+
+    GLfloat playerX = player1.GetXPos(), playerY = player1.GetYPos(), playerZ = player1.GetZPos();
+
+    // visao em terceira pessoa
+    if (toggleCam == 0)
+    {
+        float playerAngle = (player1.GetBodyRotation() + camXZAngle) * M_PI / 180.0f;
+
+        float camX = playerX + cos(camXYAngle * M_PI / 180.0f) * sin(-playerAngle) * camDist;
+        float camY = playerY + playerHeight/2 - sin(camXYAngle * M_PI / 180.0f) * camDist;
+        float camZ = playerZ + cos(camXYAngle * M_PI / 180.0f) *(-cos(-playerAngle)) * camDist;
+
+        gluLookAt(camX, camY, camZ,  // posição da câmera
+                  playerX, playerY + playerHeight/2, playerZ,  // para onde olha
+                  0, 1, 0);  // up
+
+    } else if(toggleCam == 1)
+    {    
+        // float playerAngle = player1.GetBodyRotation() * M_PI / 180.0f;
+
+        // float eyeX = playerX;
+        // float eyeY = playerY + camHeight;  // altura da cabeça
+        // float eyeZ = playerZ - camDist;
+
+        // float lookX = eyeX + sin(-playerAngle);
+        // float lookY = eyeY - camHeight * 0.5f;  // inclinação leve para baixo
+        // float lookZ = eyeZ + (-cos(-playerAngle));
+
+        // gluLookAt(
+        //         eyeX, eyeY, eyeZ,
+        //         lookX, lookY, lookZ,
+        //         0, 1, 0
+        //     );
+    
+        gluLookAt(0, 1100, 0,   // eye
+            0.0f, 0.0f, 0.0f,      // center
+            0.0f, 0.0f, 1.0f);     // up = Z
+    }
 
     // update light position to follow camera (optional but usually desirable)
-    GLfloat light_position[] = { 0.0f, eyeDist, 0.0f, 1.0f };
+    GLfloat light_position[] = { 0.0f, 4 * playerHeight, 0.0f, 1.0f };
+
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
     DrawAxes(70); // DEBUG
@@ -264,6 +307,19 @@ void keyPress(unsigned char key, int x, int y)
                 });
             }
             break;
+        // toggle camera 
+        case 'v':
+            keyStatus[(int)('v')] = 1;
+            break;
+        case 'b':
+            keyStatus[(int)('b')] = 1; 
+            break;  
+        case '=':
+            keyStatus[(int)('=')] = 1;
+            break;
+        case '-':
+            keyStatus[(int)('-')] = 1;
+            break;
         case 27:
             exit(0);
             break;
@@ -303,6 +359,34 @@ void onMouseClick(int button, int state, int x, int y)
             });
         }  
     }
+
+    if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN) {
+        lastX = x;
+        lastY = y;
+        rightButtonDown = 1;
+    } 
+    if (button == GLUT_RIGHT_BUTTON && state == GLUT_UP) {
+        rightButtonDown = 0;
+    }
+ 
+}
+
+void onMouseDrag(int x, int y)
+{
+    if (!rightButtonDown)
+        return;
+
+    camXYAngle += (lastY - y) * 0.5f;
+
+    camXZAngle += (lastX - x) * 0.5f;
+
+    if (camXYAngle > 89.0f) camXYAngle = 89.0f;
+    if (camXYAngle < -89.0f) camXYAngle = -89.0f;
+
+    if (camXZAngle > 179.0f) camXZAngle = 179.0f;
+    if (camXZAngle < -179.0f) camXZAngle = -179.0f;
+
+    lastY = y; lastX = x;
 }
 
 void idle(void)
@@ -316,6 +400,23 @@ void idle(void)
     double dt = timeDiffMs / 1000.0;
 
     double ct = currentTime / 1000.0;
+
+    // camera 
+    if(keyStatus[(int)('v')]) toggleCam = 0;
+    else if(keyStatus[(int)('b')]) toggleCam = 1;
+    
+    // zoom da camera
+    if(keyStatus[(int)('=')])
+    {
+        camDist += 200 * dt;
+        if(camDist >= 500) camDist = 500;
+    }
+    if(keyStatus[(int)('-')])
+    {
+        camDist -= 200 * dt; 
+        if(camDist <= playerRadius) camDist = playerRadius + 0.2f;
+    } 
+
 
     // player 1
     player1.SetIsWalking(false);
@@ -384,7 +485,20 @@ void idle(void)
 
     glutPostRedisplay();
 }
- 
+
+
+void changeCamera(int angle, int w, int h)
+{
+    glMatrixMode (GL_PROJECTION);
+
+    glLoadIdentity ();
+
+    gluPerspective (angle, 
+            (GLfloat)w / (GLfloat)h, 1, 2000.0);
+
+    glMatrixMode (GL_MODELVIEW);
+}
+
 void init(void)
 {
     glClearColor (0.0, 0.0, 0.0, 0.0);
@@ -434,7 +548,7 @@ void readSVG(const char *fileName)
     XMLElement* c2 = c1 ? c1->NextSiblingElement("circle") : nullptr;
     XMLElement* c3 = c2 ? c2->NextSiblingElement("circle") : nullptr;
 
-    GLfloat arenaCx, arenaCy, arenaR, playerR, playerHeight;
+    GLfloat arenaCx, arenaCy, arenaR, playerR;
     if (c1) {
         arenaCx = c1->IntAttribute("cx", 0);
         arenaCy = c1->IntAttribute("cy", 0);
@@ -457,11 +571,15 @@ void readSVG(const char *fileName)
         GLfloat cy = c3->IntAttribute("cy", 0);
         GLfloat r  = c3->IntAttribute("r",  0);
 
+        playerRadius = r;
         playerHeight = 3.65 * r;
         
         player1.SetParameters(arenaCx - cx, 0, - cy + arenaCy, r, playerHeight, [](){ gameManager.decLifePlayer1(); });
         player1.DefineColor(0, 1.0f, 0); // Player 1 is green
     }
+
+    camDist = 20 * playerRadius;
+    camHeight = 3.05 * playerRadius;
 
     arena.SetParameters(0, 0, 0, arenaR, 4*playerHeight);
 
@@ -514,6 +632,8 @@ int main(int argc, char *argv[])
     glutPassiveMotionFunc(onMouseMove);
     glutMouseFunc(onMouseClick);
     
+    glutMotionFunc(onMouseDrag);
+
     init();
 
     glutMainLoop();

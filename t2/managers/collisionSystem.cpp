@@ -29,35 +29,6 @@ void CollisionSystem::CheckPair(Collider* A, Collider* B) {
     }
 }
 
-// bool CollisionSystem::CheckCollision(const Collider& A, const Collider& B) {
-    
-//     float dx, dz, rsum, dist2;
-
-//     if(B.type == CollisionType::Internal && A.type == CollisionType::External)
-//     {
-//         dx = A.circle.x - B.circle.x;
-//         dz = A.circle.z - B.circle.z;
-//         rsum = A.circle.r + B.circle.r;
-//         dist2 = dx*dx + dz*dz;
-//         return B.circle.r - sqrt(dist2) <= A.circle.r;
-//     } 
-//     else if(A.type == CollisionType::Internal && B.type == CollisionType::External)
-//     {
-//         dx = A.circle.x - B.circle.x;
-//         dz = A.circle.z - B.circle.z;
-//         rsum = A.circle.r + B.circle.r;
-//         dist2 = dx*dx + dz*dz;
-//         return A.circle.r - sqrt(dist2) <= B.circle.r;
-//     }
-    
-//     dx = A.circle.x - B.circle.x;
-//     dz = A.circle.z - B.circle.z;
-//     rsum = A.circle.r + B.circle.r;
-//     dist2 = dx*dx + dz*dz;
-    
-//     return dist2 <= rsum * rsum;
-// }
-
 bool CollisionSystem::CheckCollision(const Collider& A, const Collider& B) {
     
     float dx, dz, rsum, dist2;

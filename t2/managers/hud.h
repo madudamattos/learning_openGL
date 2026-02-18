@@ -23,7 +23,11 @@ public:
     }
 
     void SetScreen(Screen s) { currentScreen = s; }
-    void Draw(); 
+    void Draw();
+
+    void RasterChars(GLfloat x, GLfloat y, GLfloat z, const char * text, double r, double g, double b);
+    void PrintText(GLfloat x, GLfloat y, const char * text, double r, double g, double b);
+
 
 private:
     void DrawText(int x, int y, const char *text);
