@@ -35,6 +35,13 @@ public:
     int GetEntityId() const { return entityId; }
     void SetOnCollision(Callback cb) { onCollision = std::move(cb); }
 
+    float GetHeight() const { return circle.h; }
+    float GetRadius() const { return circle.r; }
+    float GetX() const { return circle.x; }
+    float GetY() const { return circle.y; }
+    float GetZ() const { return circle.z; }
+    CollisionType GetType() const { return type; }
+
 private:
     int entityId;
     Circle circle;

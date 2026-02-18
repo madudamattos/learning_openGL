@@ -27,7 +27,7 @@ Player::Player(){
     this->pos = Alglib::Mat3::Identity();
 }
 
-void Player::SetParameters(GLfloat x, GLfloat y, GLfloat z, GLfloat rad, GLfloat height, std::function<void()> onCollision = nullptr){
+void Player::SetParameters(GLfloat x, GLfloat y, GLfloat z, GLfloat rad, GLfloat height, std::function<void()> onCollision /*= nullptr*/){
     this->gXinit = x;
     this->gYinit = y;
     this->gZinit = z;
@@ -39,8 +39,23 @@ void Player::SetParameters(GLfloat x, GLfloat y, GLfloat z, GLfloat rad, GLfloat
     this->isWalking = false;
     
     // inicia colisor 
-    collider.SetParameters(x,y + heightOffset, z, rad, height, epsilon, CollisionType::External, [onCollision](Collider*, Collider*){if (onCollision) onCollision();});
-
+    // CHANGED: só chamar onCollision quando 'other' for uma bullet (h == 0)
+    collider.SetParameters(
+        x,
+        y + heightOffset,
+        z,
+        rad,
+        height,
+        epsilon,
+        CollisionType::External,
+        [onCollision](Collider* me, Collider* other) {
+            if (!other) return;
+            // bullets are spheres with h == 0; ignorar colisões com cilindros/obstáculos (h > 0)
+            if (other->GetHeight()  == 0.0f) {
+                if (onCollision) onCollision();
+            }
+        }
+    );
 
     // seta matriz de posicao inicial 
     pos.Translate(x,y,z);
@@ -152,7 +167,7 @@ void Player::Draw()
     glTranslatef(gX, 0.75*radius, gZ);
     glRotatef(bodyAngle, 0, 1, 0);
     glTranslatef(0, radius*0.9, 0); // translada pro meio do corpo
-    glTranslatef(radius, 0, 0); // translada pra lateral da esfera
+    glTranslatef(radius/2, 0, 0); // translada pra lateral da esfera
     glRotatef(armAngle.x, 1, 0, 0); // rotaciona a arma em x
     glRotatef(armAngle.y, 0, 1, 0); // rotaciona a arma em y
     glTranslatef(0, 0, rectHeight/2); // translata para desenhar a partir centro do paralelepipedo
@@ -278,7 +293,7 @@ Alglib::Mat3 Player::GetGunPos()
     m.Translate(GetXPos(), GetYPos(), GetZPos())
      .Translate(0, 0.75*radius, 0)
      .RotateY(this->bodyAngle)
-     .Translate(radius, radius*0.9, 0);
+     .Translate(radius/2, radius*0.9, 0);
 
     return m;
 }

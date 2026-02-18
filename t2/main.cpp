@@ -102,69 +102,42 @@ void renderScene(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+
+    if(toggleCam == 0)      // primeira pessoa
+        gluPerspective(85.0f, (GLfloat)Width/Height, 1.0f, 2000.0f);
+    else                    // terceira pessoa
+        gluPerspective(30.0f, (GLfloat)Width/Height, 1.0f, 2000.0f);
+
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    // // Use the same fovy used in init() and compute a camera distance that
-    // // fits the whole "ViewingHeight" in view (minimal perspective distortion).
-    // const float fovy_deg = 30.0f; // must match init()'s fovy
-    // const float fovy_rad = fovy_deg * (float)M_PI / 180.0f;
-    // const float halfViewHeight = (float)ViewingHeight * 0.5f;
-
-    // // distance so that the vertical span at z=0 equals ViewingHeight
-    // float eyeDist = (halfViewHeight / tanf(fovy_rad * 0.5f));
-
-    // // small margin so edges are not clipped
-    // const float margin = 1.05f;
-    // eyeDist *= margin;
-
-    // // position camera on +Y looking to origin, Z is up
-    // gluLookAt(300.0f, eyeDist * 0.2, -700.0f,   // eye
-    //         0.0f, 0.0f, 0.0f,      // center
-    //         0.0f, 1.0f, 0.0f);     // up = Z
-            
-    
-    //  camera vista de cima
-    // gluLookAt(0, 1100, 0,   // eye
-    //     0.0f, 0.0f, 0.0f,      // center
-    //     0.0f, 0.0f, 1.0f);     // up = Z
-
     GLfloat playerX = player1.GetXPos(), playerY = player1.GetYPos(), playerZ = player1.GetZPos();
+    float playerAngle = player1.GetBodyRotation() * M_PI / 180.0f;
 
-    // visao em terceira pessoa
+    // primeira pessoa
     if (toggleCam == 0)
-    {
-        float playerAngle = (player1.GetBodyRotation() + camXZAngle) * M_PI / 180.0f;
+    {                
+        gluLookAt(
+            playerX, playerY + camHeight, playerZ,
+            playerX - sin(-playerAngle), playerY + camHeight - 0.2f, playerZ - (-cos(-playerAngle)),
+            0, 1, 0
+        );
+    } 
+    //  terceira pessoa
+    else if(toggleCam == 1)
+    {    
+        float yaw = (playerAngle + camXZAngle * M_PI / 180.0f );
+        float pitch = camXYAngle * M_PI / 180.0f;
 
-        float camX = playerX + cos(camXYAngle * M_PI / 180.0f) * sin(-playerAngle) * camDist;
-        float camY = playerY + playerHeight/2 - sin(camXYAngle * M_PI / 180.0f) * camDist;
-        float camZ = playerZ + cos(camXYAngle * M_PI / 180.0f) *(-cos(-playerAngle)) * camDist;
+        float camX = playerX + cos(pitch) * sin(-yaw) * camDist;
+        float camY = playerY + playerHeight - sin(pitch) * camDist;
+        float camZ = playerZ + cos(pitch) *(-cos(-yaw)) * camDist;
 
         gluLookAt(camX, camY, camZ,  // posição da câmera
                   playerX, playerY + playerHeight/2, playerZ,  // para onde olha
                   0, 1, 0);  // up
-
-    } else if(toggleCam == 1)
-    {    
-        // float playerAngle = player1.GetBodyRotation() * M_PI / 180.0f;
-
-        // float eyeX = playerX;
-        // float eyeY = playerY + camHeight;  // altura da cabeça
-        // float eyeZ = playerZ - camDist;
-
-        // float lookX = eyeX + sin(-playerAngle);
-        // float lookY = eyeY - camHeight * 0.5f;  // inclinação leve para baixo
-        // float lookZ = eyeZ + (-cos(-playerAngle));
-
-        // gluLookAt(
-        //         eyeX, eyeY, eyeZ,
-        //         lookX, lookY, lookZ,
-        //         0, 1, 0
-        //     );
-    
-        gluLookAt(0, 1100, 0,   // eye
-            0.0f, 0.0f, 0.0f,      // center
-            0.0f, 0.0f, 1.0f);     // up = Z
     }
 
     // update light position to follow camera (optional but usually desirable)
@@ -185,6 +158,18 @@ void renderScene(void)
     if(bulletP2) bulletP2->Draw();
 
     glutSwapBuffers();
+}
+
+void changeCamera(int angle, int w, int h)
+{
+    glMatrixMode (GL_PROJECTION);
+
+    glLoadIdentity ();
+
+    gluPerspective (angle, 
+            (GLfloat)w / (GLfloat)h, 1, 2000.0);
+
+    glMatrixMode (GL_MODELVIEW);
 }
 
 
@@ -240,9 +225,13 @@ void restartGame()
         bulletP2 = nullptr; 
     }
 
-    // // reseta os jogadores para a posição inicial 
+    // reseta os jogadores para a posição inicial 
     player1.ResetPosition();
     player2.ResetPosition();
+
+    // reseta a camera em terceira pessoa
+    camXYAngle = -10.0f;
+    camXZAngle = 0.0f;
 
     setPlayersInitialRotation();
 }
@@ -340,7 +329,7 @@ void onMouseMove(int x, int y)
 
     GLfloat thetaY = GUN_ANGLE - mouseY * GUN_ANGLE * 2;
 
-    player1.SetArmAngle(thetaX, thetaY);
+    player1.SetArmAngle(thetaX, -thetaY);
 
 }
 
@@ -405,6 +394,13 @@ void idle(void)
     if(keyStatus[(int)('v')]) toggleCam = 0;
     else if(keyStatus[(int)('b')]) toggleCam = 1;
     
+
+    // if(toggleCam == 0)      // Primeira pessoa
+    //     changeCamera(85, Width, Height);
+    // else                    // Terceira pessoa
+    //     changeCamera(30, Width, Height);
+
+
     // zoom da camera
     if(keyStatus[(int)('=')])
     {
@@ -484,19 +480,6 @@ void idle(void)
 
 
     glutPostRedisplay();
-}
-
-
-void changeCamera(int angle, int w, int h)
-{
-    glMatrixMode (GL_PROJECTION);
-
-    glLoadIdentity ();
-
-    gluPerspective (angle, 
-            (GLfloat)w / (GLfloat)h, 1, 2000.0);
-
-    glMatrixMode (GL_MODELVIEW);
 }
 
 void init(void)
