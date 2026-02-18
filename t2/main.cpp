@@ -21,8 +21,8 @@ using namespace tinyxml2;
 
 
 // Window dimensions
-const GLint Width = WINDOW_SIZE;
-const GLint Height = WINDOW_SIZE;
+const GLint Width = 800;
+const GLint Height = 500;
 
 // Viewing dimensions
 GLint ViewingWidth;
@@ -98,23 +98,10 @@ void DrawAxes(double size)
     glPopMatrix();    
 }
 
-void renderScene(void)
+void SetupCamera(Player& player)
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-
-    if(toggleCam == 0)      // primeira pessoa
-        gluPerspective(85.0f, (GLfloat)Width/Height, 1.0f, 2000.0f);
-    else                    // terceira pessoa
-        gluPerspective(30.0f, (GLfloat)Width/Height, 1.0f, 2000.0f);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    GLfloat playerX = player1.GetXPos(), playerY = player1.GetYPos(), playerZ = player1.GetZPos();
-    float playerAngle = player1.GetBodyRotation() * M_PI / 180.0f;
+    GLfloat playerX = player.GetXPos(), playerY = player.GetYPos(), playerZ = player.GetZPos();
+    float playerAngle = player.GetBodyRotation() * M_PI / 180.0f;
 
     // primeira pessoa
     if (toggleCam == 0)
@@ -135,25 +122,70 @@ void renderScene(void)
         float camY = playerY + playerHeight - sin(pitch) * camDist;
         float camZ = playerZ + cos(pitch) *(-cos(-yaw)) * camDist;
 
-        gluLookAt(camX, camY, camZ,  // posição da câmera
-                  playerX, playerY + playerHeight/2, playerZ,  // para onde olha
-                  0, 1, 0);  // up
+        gluLookAt(camX, camY, camZ,  
+                  playerX, playerY + playerHeight/2, playerZ,  
+                  0, 1, 0);  
     }
+}
+
+
+void renderScene(void)
+{
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glMatrixMode(GL_PROJECTION);
+
+    // VIEWPORT PLAYER 1
+
+    glViewport(0,0,Width/2, Height);
+    glLoadIdentity();
+
+    if(toggleCam == 0)      // primeira pessoa
+        gluPerspective(85.0f, (GLfloat)(Width/2)/Height, 1.0f, 2000.0f);
+    else                    // terceira pessoa
+        gluPerspective(30.0f, (GLfloat)(Width/2)/Height, 1.0f, 2000.0f);
+
+    // seta a camera do player 1 
+    SetupCamera(player1);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 
     GLfloat light_position[] = { 0.0f, 4 * playerHeight - 0.4f, 0.0f, 1.0f };
 
+    // desenha todos os elementos da cena 
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-
     DrawAxes(70); // DEBUG
-
     arena.Draw();
     player2.Draw();
     player1.Draw();
-
     hud.Draw();
-
     if(bulletP1) bulletP1->Draw();
+    if(bulletP2) bulletP2->Draw();
 
+    // VIEWPORT PLAYER 2 
+
+    glMatrixMode(GL_PROJECTION);
+    glViewport(Width/2, 0, Width/2, Height);
+
+    glLoadIdentity();
+    
+    if(toggleCam == 0)      // primeira pessoa
+        gluPerspective(85.0f, (GLfloat)(Width/2)/Height, 1.0f, 2000.0f);
+    else                    // terceira pessoa
+        gluPerspective(30.0f, (GLfloat)(Width/2)/Height, 1.0f, 2000.0f);
+
+    // seta a camera do player 1 
+    SetupCamera(player2);
+    
+    // desenha todos os elementos da cena 
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+    DrawAxes(70); // DEBUG
+    arena.Draw();
+    player2.Draw();
+    player1.Draw();
+    hud.Draw();
+    if(bulletP1) bulletP1->Draw();
     if(bulletP2) bulletP2->Draw();
 
     glutSwapBuffers();
@@ -481,6 +513,11 @@ void idle(void)
     glutPostRedisplay();
 }
 
+void reshape(int w, int h)
+{
+    glViewport(0, 0, w, h);
+}
+
 void init(void)
 {
     glClearColor (0.0, 0.0, 0.0, 0.0);
@@ -616,6 +653,8 @@ int main(int argc, char *argv[])
     glutMouseFunc(onMouseClick);
     
     glutMotionFunc(onMouseDrag);
+
+    glutReshapeFunc(reshape);
 
     init();
 

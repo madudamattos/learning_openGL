@@ -37,7 +37,7 @@ void HUD::DrawHearts(int x, int y, int n) {
 void HUD::DrawGameOverScreen()
 {
     const std::string go = "GAME OVER";
-    int sx = (windowWidth / 2) - (int)go.size() * 4;
+    int sx = (windowWidth / 4) - (int)go.size() * 4;
     DrawText(sx, windowHeight / 3, go.c_str());
 
     std::string winner;
@@ -46,7 +46,7 @@ void HUD::DrawGameOverScreen()
     if(refGameManager->getWinner() == Winner::Player2) winner = "Player 2 wins!";
     if(refGameManager->getWinner() == Winner::None) winner = "No winners!";
 
-    sx = (windowWidth / 2) - (int)winner.size() * 4;
+    sx = (windowWidth / 4) - (int)winner.size() * 4;
     DrawText(sx, windowHeight / 3 + 20, winner.c_str());
 }
 
@@ -56,19 +56,19 @@ void HUD::DrawBaseHUD()
 
     char buf[64];
     std::snprintf(buf, sizeof(buf), "Player 1");
-    DrawText(10, 20, buf); // 10px da esquerda, 20px do topo
+    DrawText(20, 20, buf); // 10px da esquerda, 20px do topo
 
     std::snprintf(buf, sizeof(buf), "Player 2");
-    DrawText(windowWidth - 90, 20, buf); 
+    DrawText(windowWidth/2 - 90, 20, buf); 
 
     int lives1 = refGameManager->getLifePlayer1();
     int lives2 = refGameManager->getLifePlayer2();
 
     glColor3f(0.0f, 1.0f, 0.0f);
-    DrawHearts(10, 40, lives1);
+    DrawHearts(20, 40, lives1);
     
     glColor3f(1.0f, 0.0f, 0.0f);
-    DrawHearts(windowWidth - 90, 40, lives2);
+    DrawHearts(windowWidth/2 - 80, 40, lives2);
 }
 
 void HUD::Draw() {
@@ -88,7 +88,7 @@ void HUD::Draw() {
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
-    glOrtho(0, windowWidth, windowHeight, 0, -1, 1); // origem no topo-left
+    glOrtho(0, windowWidth/2, windowHeight, 0, -1, 1); // origem no topo-left
 
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
