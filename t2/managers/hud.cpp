@@ -88,7 +88,7 @@ void HUD::Draw() {
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
-    glOrtho(0, windowWidth/2, windowHeight, 0, -1, 1); // origem no topo-left
+    glOrtho(0, windowWidth/2, 500, 0, -1, 1); // origem no topo-left
 
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();

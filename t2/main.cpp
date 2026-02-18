@@ -110,7 +110,7 @@ void SetupCamera(Player& player)
     {                
         gluLookAt(
             playerX, playerY + camHeight, playerZ,
-            playerX - sin(-playerAngle), playerY + camHeight - 0.2f, playerZ - (-cos(-playerAngle)),
+            playerX - sin(-playerAngle), playerY + camHeight, playerZ - (-cos(-playerAngle)),
             0, 1, 0
         );
     } 
@@ -130,71 +130,76 @@ void SetupCamera(Player& player)
     }
 }
 
+void RenderViewport(int x, int y, int w, int h, Player& player, bool fixedFirstPerson)
+{
+    glViewport(x, y, w, h);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(85.0f, (GLfloat)w / h, 1.0f, 2000.0f);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    if (fixedFirstPerson)
+    {
+        // força primeira pessoa fixa
+        GLfloat playerX = player.GetXPos();
+        GLfloat playerY = player.GetYPos();
+        GLfloat playerZ = player.GetZPos();
+        float playerAngle = player.GetBodyRotation() * M_PI / 180.0f;
+
+        gluLookAt(
+            playerX, playerY + camHeight + 0.1f, playerZ,
+            playerX - sin(-playerAngle),
+            playerY + camHeight - 0.2f,
+            playerZ - (-cos(-playerAngle)),
+            0, 1, 0
+        );
+    }
+    else
+    {
+        SetupCamera(player);
+    }
+
+    GLfloat light_position[] = { 0.0f, 4 * playerHeight - 0.4f, 0.0f, 1.0f };
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
+    arena.Draw();
+    player1.Draw();
+    player2.Draw();
+
+    if(bulletP1) bulletP1->Draw();
+    if(bulletP2) bulletP2->Draw();
+}
+
 
 void renderScene(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glMatrixMode(GL_PROJECTION);
-
     if(lights) glEnable(GL_LIGHT0);
     else glDisable(GL_LIGHT0);
 
-    // VIEWPORT PLAYER 1
+    // PARTE SUPERIOR
+    RenderViewport(0, Height, Width/2, HeightEye, player1, true);
+    RenderViewport(Width/2, Height, Width/2, HeightEye, player2, true);
 
-    glViewport(0,0,Width/2, Height);
-    glLoadIdentity();
+    // PARTE INFERIOR 
+    RenderViewport(0, 0, Width/2, Height, player1, false);
+    RenderViewport(Width/2, 0, Width/2, Height, player2, false);
 
-    if(toggleCam == 0)      // primeira pessoa
-        gluPerspective(85.0f, (GLfloat)(Width/2)/Height, 1.0f, 2000.0f);
-    else                    // terceira pessoa
-        gluPerspective(30.0f, (GLfloat)(Width/2)/Height, 1.0f, 2000.0f);
+    // renderiza a hud
 
-    // seta a camera do player 1 
-    SetupCamera(player1);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    GLfloat light_position[] = { 0.0f, 4 * playerHeight - 0.4f, 0.0f, 1.0f };
-
-    // desenha todos os elementos da cena 
-    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-    DrawAxes(70); // DEBUG
-    arena.Draw();
-    player2.Draw();
-    player1.Draw();
+    glViewport(0, 0, Width/2, Height);
     hud.Draw();
-    if(bulletP1) bulletP1->Draw();
-    if(bulletP2) bulletP2->Draw();
-
-    // VIEWPORT PLAYER 2 
-
-    glMatrixMode(GL_PROJECTION);
+    
     glViewport(Width/2, 0, Width/2, Height);
-
-    glLoadIdentity();
-    
-    if(toggleCam == 0)      // primeira pessoa
-        gluPerspective(85.0f, (GLfloat)(Width/2)/Height, 1.0f, 2000.0f);
-    else                    // terceira pessoa
-        gluPerspective(30.0f, (GLfloat)(Width/2)/Height, 1.0f, 2000.0f);
-
-    // seta a camera do player 1 
-    SetupCamera(player2);
-    
-    // desenha todos os elementos da cena 
-    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-    DrawAxes(70); // DEBUG
-    arena.Draw();
-    player2.Draw();
-    player1.Draw();
     hud.Draw();
-    if(bulletP1) bulletP1->Draw();
-    if(bulletP2) bulletP2->Draw();
-
+ 
     glutSwapBuffers();
 }
+
 
 void changeCamera(int angle, int w, int h)
 {
@@ -359,19 +364,29 @@ void keyPress(unsigned char key, int x, int y)
 
 void onMouseMove(int x, int y)
 {
-    if(gameManager.isGameOver()) return; 
+    if(gameManager.isGameOver()) return;
 
-    float mouseX = (float)x/(float)WINDOW_WIDTH;
+    // Ignora a parte superior (eye view)
+    if(y < HeightEye) 
+        return;
+
+    // Converte para coordenada relativa à viewport inferior
+    float relativeY = y - HeightEye;
+
+    // Normaliza dentro da área 500px
+    float mouseX = (float)x / (float)(WINDOW_WIDTH/2);
+    float mouseY = relativeY / (float)Height;
+
+    // Limita entre 0 e 1
+    if(mouseY < 0) mouseY = 0;
+    if(mouseY > 1) mouseY = 1;
 
     GLfloat thetaX = GUN_ANGLE - mouseX * GUN_ANGLE * 2;
-
-    float mouseY = (float)y/(float)Height;
-
     GLfloat thetaY = GUN_ANGLE - mouseY * GUN_ANGLE * 2;
 
     player1.SetArmAngle(thetaX, -thetaY);
-
 }
+
 
 void onMouseClick(int button, int state, int x, int y)
 {
