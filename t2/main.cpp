@@ -193,10 +193,14 @@ void renderScene(void)
 
     glViewport(0, 0, Width/2, Height);
     hud.Draw();
-    
+
     glViewport(Width/2, 0, Width/2, Height);
     hud.Draw();
- 
+
+    // depois de desenhar as duas HUDs
+    hud.DrawMiniMap();
+
+
     glutSwapBuffers();
 }
 

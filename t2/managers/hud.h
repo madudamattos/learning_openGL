@@ -26,6 +26,7 @@ public:
 
     void SetScreen(Screen s) { currentScreen = s; }
     void Draw();
+    void DrawMiniMap();
 
     void RasterChars(GLfloat x, GLfloat y, GLfloat z, const char * text, double r, double g, double b);
     void PrintText(GLfloat x, GLfloat y, const char * text, double r, double g, double b);
@@ -36,5 +37,6 @@ private:
     void DrawHearts(int x, int y, int n);
     void DrawBaseHUD();
     void DrawGameOverScreen();
+
 };
 #endif

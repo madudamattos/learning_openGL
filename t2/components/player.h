@@ -60,6 +60,8 @@ class Player
         Alglib::Tuple3 GetArmAngle() const { return armAngle; }
         Alglib::Mat3 GetGunPos();
 
+        GLfloat GetRadius() const { return radius; }
+
         GLfloat GetYPos();
         GLfloat GetXPos();
         GLfloat GetZPos();

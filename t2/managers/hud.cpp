@@ -1,10 +1,15 @@
 #include "hud.h"
+#include "arena.h"
+#include "player.h"
 #include <GL/glut.h>
 #include <string>
 #include <cstdio>
 #include <cmath>
 
 extern class GameManager* refGameManager;
+extern Arena arena;
+extern Player player1;
+extern Player player2;
 
 static void glutDrawString(int x, int y, void *font, const std::string &s) {
     glRasterPos2i(x, y);
@@ -94,16 +99,15 @@ void HUD::Draw() {
     glPushMatrix();
     glLoadIdentity();
 
-    // decide o que desenhar com base no enum Screen
     if (currentScreen == Screen::baseHUD) {
         DrawBaseHUD();
     } else if (currentScreen == Screen::gameOver) {
         DrawGameOverScreen();
     }
 
-    glPopMatrix(); // MODELVIEW
+    glPopMatrix(); 
     glMatrixMode(GL_PROJECTION);
-    glPopMatrix(); // PROJECTION
+    glPopMatrix(); 
     glMatrixMode(GL_MODELVIEW);
 
     // restaura estados anteriores (depth/light/texture)
@@ -130,13 +134,123 @@ void HUD::RasterChars(GLfloat x, GLfloat y, GLfloat z, const char * text, double
 
 void HUD::PrintText(GLfloat x, GLfloat y, const char * text, double r, double g, double b)
 {
-    //Draw text considering a 2D space (disable all 3d features)
     glMatrixMode (GL_PROJECTION);
-    //Push to recover original PROJECTION MATRIX
     glPushMatrix();
         glLoadIdentity ();
         glOrtho (0, 1, 0, 1, -1, 1);
         RasterChars(x, y, 0, text, r, g, b);    
     glPopMatrix();
     glMatrixMode (GL_MODELVIEW);
+}
+
+void HUD::DrawMiniMap()
+{
+    // Minimapa quadrado
+    int miniSize = windowWidth / 4;
+    int miniW = miniSize;
+    int miniH = miniSize;
+
+    int posX = windowWidth - miniW;
+    int posY = 0;
+
+    // Salva viewport atual
+    GLint oldViewport[4];
+    glGetIntegerv(GL_VIEWPORT, oldViewport);
+
+    glViewport(posX, posY, miniW, miniH);
+    
+    // Estados
+    glPushAttrib(GL_ENABLE_BIT);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+
+
+    // Projeção ortográfica
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+
+    float arenaR = arena.GetRadius();
+    glOrtho(-arenaR, arenaR,
+            -arenaR, arenaR,
+            -1, 1);
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+
+    // DESENHAR ARENA
+    glColor3f(1,1,1);
+    glBegin(GL_LINE_LOOP);
+    for(int i = 0; i < 64; i++)
+    {
+        float ang = 2.0f * M_PI * i / 64;
+        glVertex2f(arenaR * cos(ang),
+                   arenaR * sin(ang));
+    }
+    glEnd();
+
+
+    // OBSTÁCULOS
+    glColor3f(0,0,0);
+
+    for(auto& obs : arena.GetObstacleVector())
+    {
+        glBegin(GL_LINE_LOOP);
+        for(int i = 0; i < 32; i++)
+        {
+            float ang = 2.0f * M_PI * i / 32;
+            glVertex2f(
+                obs.x + obs.r * cos(ang),
+                obs.z + obs.r * sin(ang)
+            );
+        }
+        glEnd();
+    }
+
+    // PLAYER 1 
+    float r1 = player1.GetRadius();
+
+    glColor3f(0,1,0);
+    glBegin(GL_LINE_LOOP);
+    for(int i = 0; i < 32; i++)
+    {
+        float ang = 2.0f * M_PI * i / 32;
+        glVertex2f(
+            player1.GetXPos() + r1 * cos(ang),
+            player1.GetZPos() + r1 * sin(ang)
+        );
+    }
+    glEnd();
+
+    // PLAYER 2 
+    float r2 = player2.GetRadius();
+
+    glColor3f(1,0,0);
+    glBegin(GL_LINE_LOOP);
+    for(int i = 0; i < 32; i++)
+    {
+        float ang = 2.0f * M_PI * i / 32;
+        glVertex2f(
+            player2.GetXPos() + r2 * cos(ang),
+            player2.GetZPos() + r2 * sin(ang)
+        );
+    }
+    glEnd();
+
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+
+    glPopAttrib();
+
+    // Restaurar viewport original
+    glViewport(oldViewport[0],
+               oldViewport[1],
+               oldViewport[2],
+               oldViewport[3]);
 }

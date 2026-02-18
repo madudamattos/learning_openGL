@@ -51,6 +51,8 @@ class Arena
         // Return obstacles vector
         std::vector<Obstacle> GetObstacles();
 
+        float GetRadius() const { return radius; }
+        
         // Desenha a arena
         void Draw();
 
