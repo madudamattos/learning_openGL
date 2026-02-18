@@ -3,7 +3,7 @@ CXXFLAGS := -std=c++17 -O2
 INCLUDES := -I. -Icomponents -Imanagers -Iutils
 LIBS := -lGL -lGLU -lglut
 
-TARGET := trabalhocg3D
+TARGET := trabalhocg
 SRCS := $(wildcard *.cpp components/*.cpp managers/*.cpp utils/*.cpp)
 
 OBJDIR := objects
