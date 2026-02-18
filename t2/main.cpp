@@ -290,7 +290,7 @@ void keyPress(unsigned char key, int x, int y)
     
     unsigned int code = static_cast<unsigned char>(key); 
     switch (code) {
-        // movimentação player1 (usar keyStatus + idle)
+        // movimentação player1 
         case 'a': case 'A':
             keyStatus[(int)('a')] = 1;
             break;
@@ -596,7 +596,7 @@ void readSVG(const char *fileName)
         arenaCy = c1->IntAttribute("cy", 0);
         arenaR  = c1->IntAttribute("r",  0);
 
-        ViewingHeight = ViewingWidth = 2 * arenaR; // MUDAR AQUI 
+        ViewingHeight = ViewingWidth = 2 * arenaR; 
     }
     if (c2) {
         GLfloat cx = c2->IntAttribute("cx", 0);

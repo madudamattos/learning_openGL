@@ -69,7 +69,7 @@ bool CollisionSystem::CheckCollision(const Collider& A, const Collider& B) {
         return false;
     }
 
-    // --- dois externos: calcular separação horizontal ANTES do teste ---
+    // calcular separação horizontal 
     dx = A.circle.x - B.circle.x;
     dz = A.circle.z - B.circle.z;
     rsum = A.circle.r + B.circle.r;
@@ -126,13 +126,9 @@ bool CollisionSystem::TestCollision(const Collider& collider, const Collider* ig
         if (ignore && c == ignore) continue;
         if (c->GetEntityId() == collider.GetEntityId()) continue;
         if (CheckCollision(collider, *c)) {
-            // DEBUG
-            // std::cout << "   -> COLLISION with id="<<c->GetEntityId()<<"\n";
             return true;
         }
     }
 
-    // DEBUG
-    // std::cout << "   -> no collision\n";
     return false;
 }
