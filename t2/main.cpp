@@ -498,11 +498,6 @@ void init(void)
     glLightfv(GL_LIGHT0, GL_DIFFUSE,  light_diffuse);
     glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
 
-    // // Atenuação
-    // glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.0f);
-    // glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.01f);
-    // glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.0f);
-
     ResetKeyStatus();
 
     glMatrixMode(GL_PROJECTION);

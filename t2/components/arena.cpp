@@ -172,7 +172,7 @@ void Arena::Draw()
     glPushMatrix();
         glTranslatef(0, height, 0);
         glRotatef(180, 1,0,0);
-        Material ceilingMat(0.5f, 0.5f, 0.5f);
+        Material ceilingMat(0.6f, 0.6f, 0.9f);
         ceilingMat.Apply();
         DrawCircle(radius, 0.3f,0.3f,0.3f);
     glPopMatrix();
