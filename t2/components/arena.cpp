@@ -8,7 +8,7 @@ extern CollisionSystem* gCollisionSystem;
 void Arena::SetParameters(GLfloat x, GLfloat y, GLfloat z, GLfloat r, GLfloat height = 0.0f)
 {
     this->gX = x;
-    this->gY = x;
+    this->gY = y;
     this->gZ = z;
     this->radius = r;
     this->height = height;
@@ -111,22 +111,86 @@ void Arena::DrawSphere(GLfloat radius, GLfloat R, GLfloat G, GLfloat B)
     glutSolidSphere((GLdouble) radius, 20, 10);
 }
 
+void Arena::DrawCylinder(GLfloat radius, GLfloat height, bool insideView)
+{
+    const int slices = 40;
+    float angleStep = 2.0f * M_PI / slices;
+
+    GLboolean wasCull = glIsEnabled(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
+
+    if (insideView)
+        glCullFace(GL_FRONT);  // mostra lado interno
+    else
+        glCullFace(GL_BACK);   // mostra lado externo
+
+    // ===== PAREDE =====
+    glBegin(GL_QUAD_STRIP);
+    for(int i = 0; i <= slices; i++)
+    {
+        float angle = i * angleStep;
+        float x = cos(angle);
+        float z = sin(angle);
+
+        glNormal3f(x, 0, z);
+
+        glVertex3f(radius * x, 0, radius * z);
+        glVertex3f(radius * x, height, radius * z);
+    }
+    glEnd();
+
+    glCullFace(GL_BACK);
+
+    if (!wasCull)
+        glDisable(GL_CULL_FACE);
+}
+
+void Arena::DrawObstacle(GLfloat radius, GLfloat height)
+{
+    Material wallMat(0.2f, 0.4f, 0.6f);
+    wallMat.Apply();
+
+    DrawCylinder(radius, height, false);
+    glTranslatef(0, height, 0);
+    DrawCircle(radius,0.2,0.4f,0.6f);
+}
+
+
 void Arena::Draw()
 {
-    // Desenha o circulo do chão da arena 
     glPushMatrix();
-    glTranslatef(gX, 0, gY);
-    DrawCircle(radius, 0.0f, 0.0f, 1.0f); // arena é azul
+    glTranslatef(gX, 0, gZ);
+
+    // ===== CHÃO =====
+    glPushMatrix();
+        Material floorMat(0.1f, 0.1f, 0.4f);
+        floorMat.Apply();
+        DrawCircle(radius, 0,0,1); // pode adaptar depois
     glPopMatrix();
-    
-    int obsCount = ObstacleCount();
-    
-    // Draw individual obstacles
+
+    // ===== TETO =====
+    glPushMatrix();
+        glTranslatef(0, height, 0);
+        glRotatef(180, 1,0,0);
+        Material ceilingMat(0.5f, 0.5f, 0.5f);
+        ceilingMat.Apply();
+        DrawCircle(radius, 0.3f,0.3f,0.3f);
+    glPopMatrix();
+
+    // ===== PAREDE INTERNA =====
+    glPushMatrix();
+        Material wallMat(0.4f, 0.4f, 0.8f);
+        wallMat.Apply();
+        DrawCylinder(radius, height, true); // TRUE = inside
+    glPopMatrix();
+
+    glPopMatrix();
+
+    // Obstáculos
     for (const auto &obs : obstacles) {
         glPushMatrix();
         glTranslatef(obs.x, obs.y, obs.z);
-        DrawSphere(obs.r, 0.1f,0.1f,0.2f);
+        DrawObstacle(obs.r, obs.h);
         glPopMatrix();
     }
-
 }

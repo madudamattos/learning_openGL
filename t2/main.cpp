@@ -140,8 +140,7 @@ void renderScene(void)
                   0, 1, 0);  // up
     }
 
-    // update light position to follow camera (optional but usually desirable)
-    GLfloat light_position[] = { 0.0f, 4 * playerHeight, 0.0f, 1.0f };
+    GLfloat light_position[] = { 0.0f, 4 * playerHeight - 0.4f, 0.0f, 1.0f };
 
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
@@ -491,17 +490,23 @@ void init(void)
     glEnable(GL_LIGHT0);
     glEnable(GL_DEPTH_TEST);
 
-    ResetKeyStatus();
+    GLfloat light_ambient[]  = { 0.5f, 0.5f, 0.5f, 1.0f };
+    GLfloat light_diffuse[]  = { 1.0f, 1.0f, 1.0f, 1.0f };
+    GLfloat light_specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-    // Projeção em perspectiva com FOV menor (20-35)
-    float fovy = 30.0f;                      
-    float aspect = (GLfloat)Width / (GLfloat)Height;
-    float nearv = 1.0f;
-    float farv  = 2000.0f;
+    glLightfv(GL_LIGHT0, GL_AMBIENT,  light_ambient);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE,  light_diffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
+
+    // // Atenuação
+    // glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.0f);
+    // glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.01f);
+    // glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.0f);
+
+    ResetKeyStatus();
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(fovy, aspect, nearv, farv);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }

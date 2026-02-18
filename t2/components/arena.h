@@ -7,6 +7,7 @@
 #include <iostream>
 #include "collisionSystem.h"
 #include "collider.h"
+#include "material.h"
 
 struct Obstacle
 {
@@ -59,6 +60,9 @@ class Arena
     private:
         void DrawCircle(GLfloat rad, GLfloat R, GLfloat G, GLfloat B);
         void DrawSphere(GLfloat radius, GLfloat R, GLfloat G, GLfloat B);
+        void DrawCylinder(GLfloat radius, GLfloat height, bool insideView);
+
+        void DrawObstacle(GLfloat radius, GLfloat height);
         
         // Remove todos os obstáculos e desaloca memória
         void ClearObstacles(bool freeMemory);
